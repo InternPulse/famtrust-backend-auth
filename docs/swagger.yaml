@@ -1,0 +1,10 @@
+basePath: /api/v1/
+host: localhost:8001
+info:
+  contact: {}
+  description: This is the Authentication and Authrization micro-service for the FamTrust
+    Web App.
+  title: FamTrust API Backend - Auth
+  version: "1.0"
+paths: {}
+swagger: "2.0"
