@@ -1,0 +1,11 @@
+---
+- hosts: all
+  tasks:
+    - name: Ping hosts
+      ansible.builtin.ping:
+
+- hosts: server
+  become: true
+  roles:
+    # - docker
+    - docker-compose
