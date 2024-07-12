@@ -1,0 +1,11 @@
+- name: Clone the project repo
+  git:
+    repo: "https://github.com/InternPulse/famtrust-backend-auth"
+    dest: ~/auth-app
+
+- name: Run docker compose
+  community.docker.docker_compose_v2:
+    project_src: ~/auth-app
+    pull: missing
+    state: present
+    build: always
