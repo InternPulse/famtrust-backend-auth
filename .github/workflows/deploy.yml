@@ -38,4 +38,4 @@ jobs:
       - name: Run Ansible Playbook
         working-directory: ./deploy
         run: |
-          ansible-playbook playbook.yaml
+          ansible-playbook playbook.yml
