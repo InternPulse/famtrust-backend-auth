@@ -1,4 +1,4 @@
-name: Deploy Ansible Playbook
+name: Deploy with Ansible
 
 on:
   push:
@@ -8,34 +8,33 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: ./deploy
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+    - name: Checkout repository
+      uses: actions/checkout@v3
 
-      - name: Set up SSH
-        run: |
-          mkdir -p ~/.ssh
-          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+    - name: Set up SSH
+      uses: webfactory/ssh-agent@v0.5.4
+      with:
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: Install Ansible
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y ansible
-          ansible-galaxy collection install community.docker
+    - name: Install Ansible
+      run: |
+        sudo apt update
+        sudo apt install -y ansible
+        # sudo pip install ansible
 
-      - name: Make Inventory
-        working-directory: ./deploy
-        run: |
-          echo "[server]" > ./inventory.ini
-          echo "$SERVER_IP" >> ./inventory.ini
-        env:
-          SERVER_IP: ${{ secrets.SERVER_IP }}
+    - name: Install Ansible Collections
+      run: ansible-galaxy collection install community.docker  
 
-      - name: Run Ansible Playbook
-        working-directory: ./deploy
-        run: |
-          ansible-playbook playbook.yml
+    - name: Create Inventory;
+      run: sudo echo -e "[server]\n${{secrets.SERVER_IP}}" > inventory.ini
+
+    - name: Run Ansible Playbook
+      run: ansible-playbook playbook.yml
+      env:
+        ANSIBLE_HOST_KEY_CHECKING: 'false'
