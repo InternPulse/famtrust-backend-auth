@@ -27,8 +27,21 @@ func (app *Config) routes() *gin.Engine {
 
 	// Auth Routes
 	v1.GET("/signup", app.Handlers.Users().Signup)
-	v1.GET("/login", app.Handlers.Users().Login)
-	v1.GET("/validate", app.Handlers.Users().Validate)
+	// v1.GET("/login", app.Handlers.Users().Login)
+	// v1.GET("/validate", app.Handlers.Users().Validate)
+	// v1.GET("/reset-password", app.Handlers.Users().ResetPassword)
+
+	// // Verification Routes
+	// v1.GET("/verify-nin", app.Handlers.Users().VerifyNIN)
+	// v1.GET("/verify-bvn", app.Handlers.Users().VerifyBVN)
+	// v1.GET("/verify-email", app.Handlers.Users().VerifyEmail)
+	// v1.GET("/verify-2fa", app.Handlers.Users().Verify2FA)
+
+	// // User & UserProfile Routes
+	// v1.GET("/user/profile", app.Handlers.Users().GetUserInFull)
+	// v1.POST("/user/create", app.Handlers.Users().CreateUser)
+	// v1.PUT("/user/update", app.Handlers.Users().UpdateUserByID)
+	// v1.DELETE("/user/delete", app.Handlers.Users().DeleteUserByID)
 
 	return mux
 
