@@ -15,10 +15,11 @@ type Models interface {
 
 type UserModels interface {
 	CreateUser(user *User) error
-	GetUserByID(userID uint) (*User, error)
+	GetUserByID(userID uuid.UUID) (*User, error)
 	GetUserByEmail(email string) (*User, error)
 	UpdateUser(user *User) error
-	DeleteUserByID(userID uint) error
+	DeleteUserByID(userID uuid.UUID) error
+	PasswordMatches(user *User, plainText string) (bool, error)
 }
 
 type UserRoles interface {
@@ -78,11 +79,11 @@ type UserProfile struct {
 }
 
 type Role struct {
-	ID         string `gorm:"primaryKey"`
-	CreatedAt  time.Time
-	UpdatedAt  time.Time
-	DeletedAt  gorm.DeletedAt `gorm:"index"`
-	Permission []Permission   `gorm:"many2many:role_permissions;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	ID          string `gorm:"primaryKey"`
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+	DeletedAt   gorm.DeletedAt `gorm:"index"`
+	Permissions []Permission   `gorm:"many2many:role_permissions;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 }
 
 type Permission struct {
@@ -90,5 +91,5 @@ type Permission struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	DeletedAt gorm.DeletedAt `gorm:"index"`
-	Role      []Role         `gorm:"many2many:role_permissions;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	Roles     []Role         `gorm:"many2many:role_permissions;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 }
