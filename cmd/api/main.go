@@ -2,10 +2,12 @@ package main
 
 import (
 	"log"
+	"os"
 
 	"github.com/InternPulse/famtrust-backend-auth/internal/db"
 	"github.com/InternPulse/famtrust-backend-auth/internal/handlers"
 	"github.com/InternPulse/famtrust-backend-auth/internal/interfaces"
+	"github.com/InternPulse/famtrust-backend-auth/internal/jwtmod"
 	"github.com/InternPulse/famtrust-backend-auth/internal/models"
 	"github.com/joho/godotenv"
 )
@@ -26,6 +28,9 @@ func main() {
 	if err := godotenv.Load(); err != nil {
 		log.Printf("Failed to load .env file: %v", err)
 	}
+
+	// init jwt
+	jwtmod.JwtKey = []byte(os.Getenv("JWTKEY"))
 
 	// new postgres instance
 	postgresDB := db.NewPostgresDB()
