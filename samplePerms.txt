@@ -1,0 +1,8 @@
+CanOperateFamilyAcct
+CanCreateUser
+CanCreateSubAcc
+CanDeleteSubAcc
+CanEditFamilyAcc
+CanSendtoSubAcc
+CanSendtoBank
+CanFreezeSubAcc
