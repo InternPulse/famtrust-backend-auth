@@ -8,8 +8,9 @@ import (
 )
 
 type Models interface {
-	User() UserModels
-	Role() UserRoles
+	Users() UserModels
+	Roles() UserRoles
+	Permissions() UserPermissions
 }
 
 type UserModels interface {
@@ -22,9 +23,18 @@ type UserModels interface {
 
 type UserRoles interface {
 	GetAllRoles() ([]Role, error)
-	GetRoleByID(roleID uint) (*Role, error)
+	GetRoleByID(roleID string) (*Role, error)
 	CreateRole(role *Role) error
-	DeleteRoleByID(roleID uint) error
+	UpdateRoleByID(role *Role) error
+	DeleteRoleByID(roleID string) error
+}
+
+type UserPermissions interface {
+	GetAllPermissions() ([]Permission, error)
+	GetPermission(perm *Permission) (*Permission, error)
+	CreatePermission(perm *Permission) error
+	UpdatePermission(perm *Permission) error
+	DeletePermission(perm Permission) error
 }
 
 // Create uuid model.
@@ -48,6 +58,7 @@ type User struct {
 	Email         string      `gorm:"not null;unique"`
 	Password_hash string      `gorm:"not null"`
 	RoleID        string      `gorm:"not null"`
+	Has_2FA       bool        `gorm:"not null"`
 	Is_verified   bool        `gorm:"not null"`
 	Is_freezed    bool        `gorm:"not null"`
 	Last_login    time.Time   `gorm:"not null"`
