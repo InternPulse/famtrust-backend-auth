@@ -17,7 +17,7 @@ func (r *UserRoles) GetAllRoles() ([]interfaces.Role, error) {
 	return roles, nil
 }
 
-func (r *UserRoles) GetRoleByID(roleID uint) (*interfaces.Role, error) {
+func (r *UserRoles) GetRoleByID(roleID string) (*interfaces.Role, error) {
 	var role interfaces.Role
 	if err := r.DB.First(&role, roleID).Error; err != nil {
 		return nil, err
@@ -32,7 +32,14 @@ func (r *UserRoles) CreateRole(role *interfaces.Role) error {
 	return nil
 }
 
-func (r *UserRoles) DeleteRoleByID(roleID uint) error {
+func (r *UserRoles) UpdateRoleByID(role *interfaces.Role) error {
+	if err := r.DB.Model(&interfaces.Role{}).Updates(&role).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r *UserRoles) DeleteRoleByID(roleID string) error {
 	if err := r.DB.Delete(&interfaces.Role{}, roleID).Error; err != nil {
 		return err
 	}
