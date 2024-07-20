@@ -11,6 +11,9 @@ import (
 func Migrate(db *gorm.DB) error {
 	err := db.AutoMigrate(
 		&interfaces.User{},
+		&interfaces.UserProfile{},
+		&interfaces.Role{},
+		&interfaces.Permission{},
 	)
 	if err != nil {
 		return err
