@@ -6,21 +6,27 @@ import (
 )
 
 type Models struct {
-	user interfaces.UserModels
-	role interfaces.UserRoles
+	users       interfaces.UserModels
+	roles       interfaces.UserRoles
+	permissions interfaces.UserPermissions
 }
 
-func (m *Models) User() interfaces.UserModels {
-	return m.user
+func (m *Models) Users() interfaces.UserModels {
+	return m.users
 }
 
-func (m *Models) Role() interfaces.UserRoles {
-	return m.role
+func (m *Models) Roles() interfaces.UserRoles {
+	return m.roles
+}
+
+func (m *Models) Permissions() interfaces.UserPermissions {
+	return m.permissions
 }
 
 func NewModel(DB *gorm.DB) interfaces.Models {
 	return &Models{
-		user: &UserModels{DB: DB},
-		role: &UserRoles{DB: DB},
+		users:       &UserModels{DB: DB},
+		roles:       &UserRoles{DB: DB},
+		permissions: &UserPermissions{},
 	}
 }
