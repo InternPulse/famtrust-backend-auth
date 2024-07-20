@@ -26,9 +26,9 @@ func (app *Config) routes() *gin.Engine {
 	v1 := api.Group("/v1")
 
 	// Auth Routes
-	v1.GET("/signup", app.Handlers.Users().Signup)
-	// v1.GET("/login", app.Handlers.Users().Login)
-	// v1.GET("/validate", app.Handlers.Users().Validate)
+	// v1.GET("/signup", app.Handlers.Users().Signup)
+	v1.GET("/login", app.Handlers.Users().Login)
+	v1.Use(app.Handlers.AuthMiddleware()).GET("/validate", app.Handlers.Users().Validate)
 	// v1.GET("/reset-password", app.Handlers.Users().ResetPassword)
 
 	// // Verification Routes
