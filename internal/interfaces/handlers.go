@@ -4,6 +4,7 @@ import "github.com/gin-gonic/gin"
 
 type Handlers interface {
 	Users() UserHandlers
+	AuthMiddleware() gin.HandlerFunc
 }
 
 type UserHandlers interface {
