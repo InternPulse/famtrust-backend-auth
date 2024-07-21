@@ -13,7 +13,7 @@ type loginRequest struct {
 type loginResponse struct {
 	StatusCode    uint                     `json:"status_code" binding:"required"`
 	StatusMessage string                   `json:"status_message" binding:"required"`
-	Token         string                   `json:"token" binding:"required"`
+	Token         string                   `json:"token,omitempty"`
 	Data          map[string]loginUserData `json:"data,omitempty"`
 }
 
