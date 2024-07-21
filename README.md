@@ -1,15 +1,12 @@
-# FamTrust Backend API
+# FamTrust Backend Auth API
 
 ## Project Overview
 
-README.md Backend API
+Live link is at [https://auth.famtrust.biz/api/v1](https://auth.famtrust.biz/api/v1)
 
-Live link is at https://
-
-Doc link at https://
+Doc link at [https://auth.famtrust.biz/api/docs/index.html](https://auth.famtrust.biz/api/docs/index.html)
 
 ## Installation Instructions
-
 ### Prerequisites
 
 Before setting up the project locally, ensure you have the following prerequisites installed:
@@ -17,19 +14,27 @@ Before setting up the project locally, ensure you have the following prerequisit
 - [Go](https://go.dev) (>=1.22.3)
 - A Database System (e.g., PostgreSQL, MySQL, SQLite)
 
-### Installation Steps
+### How to run API Locally
 
 1. Clone the repository:
 ```bash
 git clone https://github.com/InternPulse/famtrust-backend-auth.git
 ```
 
-1. Change into the parent directory:
+2. Change into the parent directory:
 ```bash
 cd famtrust-backend-auth
 ```
 
-1. Set up a virtual environment:
+3. Set appropriate values for the following Compulsory Environment Variables:
+```txt
+# Postgres connection string
+POSTGRES_DSN=""
+# Secret key for signing JWTs
+JWTKEY=""
+```
+
+3. Start the App:
 ```bash
 go run ./cmd/api
 ```
