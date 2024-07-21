@@ -2,6 +2,8 @@
   git:
     repo: "https://github.com/InternPulse/famtrust-backend-auth"
     dest: ~/auth-app
+    version: main
+    
 
 - name: Run docker compose
   community.docker.docker_compose_v2:
