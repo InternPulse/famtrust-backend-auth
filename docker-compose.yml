@@ -10,13 +10,11 @@ services:
     ports:
       - "8001:8001"
 
-  # postgres:
-  #   image: 'postgres:latest'
-  #   ports:
-  #     - "5432:5432"
-  #   environment:
-  #     POSTGRES_USER: postgres
-  #     POSTGRES_PASSWORD: password
-  #     POSTGRES_DB: app_db
-  #   volumes:
-  #     - ./scripts/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+  postgres:
+    image: 'postgres:latest'
+    ports:
+      - "5432:5432"
+    env_file:
+      - postgres.env
+    volumes:
+      - ./scripts/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
