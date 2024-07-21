@@ -28,8 +28,8 @@ func (uh *UserHandlers) Login(c *gin.Context) {
 	// validate the user against the database
 	user, err := uh.models.Users().GetUserByEmail(loginPayload.Email)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, loginResponse{
-			StatusCode:    http.StatusInternalServerError,
+		c.JSON(http.StatusUnauthorized, loginResponse{
+			StatusCode:    http.StatusUnauthorized,
 			StatusMessage: "error",
 		})
 		return
