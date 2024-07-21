@@ -5,18 +5,18 @@ services:
     build:
       context: ./
       dockerfile: Dockerfile
-    environment:
-      - POSTGRES_DSN=host=postgres port=5432 user=postgres password=password dbname=app_db sslmode=disable
+    env_file:
+      - app.env
     ports:
       - "8001:8001"
 
-  postgres:
-    image: 'postgres:latest'
-    ports:
-      - "5432:5432"
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: app_db
-    volumes:
-      - ./scripts/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+  # postgres:
+  #   image: 'postgres:latest'
+  #   ports:
+  #     - "5432:5432"
+  #   environment:
+  #     POSTGRES_USER: postgres
+  #     POSTGRES_PASSWORD: password
+  #     POSTGRES_DB: app_db
+  #   volumes:
+  #     - ./scripts/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
