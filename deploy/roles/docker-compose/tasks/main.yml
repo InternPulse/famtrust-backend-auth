@@ -11,3 +11,4 @@
     pull: missing
     state: present
     build: always
+    recreate: always
