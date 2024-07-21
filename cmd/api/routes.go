@@ -27,7 +27,9 @@ func (app *Config) routes() *gin.Engine {
 
 	// Auth Routes
 	// v1.GET("/signup", app.Handlers.Users().Signup)
-	v1.GET("/login", app.Handlers.Users().Login)
+	// login
+	v1.POST("/login", app.Handlers.Users().Login)
+	// validate
 	v1.Use(app.Handlers.AuthMiddleware()).GET("/validate", app.Handlers.Users().Validate)
 	// v1.GET("/reset-password", app.Handlers.Users().ResetPassword)
 
