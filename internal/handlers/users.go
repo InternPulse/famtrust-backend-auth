@@ -13,6 +13,17 @@ type UserHandlers struct {
 	models interfaces.Models
 }
 
+// @Summary		Login to FamTrust
+// @Description	Login to FamTrust
+// @Tags			Auth
+// @ID				login
+// @Accept			json
+// @Produce		json
+// @Failure		401
+// @Failure		500
+// @Success		200
+// @Param			credentials	body		loginRequest	true	"User Credentials"
+// @Router			/login [post]
 func (uh *UserHandlers) Login(c *gin.Context) {
 	var loginPayload loginRequest
 
@@ -61,6 +72,17 @@ func (uh *UserHandlers) Login(c *gin.Context) {
 	c.JSON(http.StatusOK, payload)
 }
 
+// @Summary		Validate User Login Token
+// @Description	Validate User Login Token
+// @Tags			Auth
+// @ID				validate
+// @Accept			json
+// @Produce		json
+// @Failure		401
+// @Failure		500
+// @Success		200
+// @Security BearerAuth
+// @Router			/validate [get]
 func (uh *UserHandlers) Validate(c *gin.Context) {
 	UserID, exists := c.Get("UserID")
 	if !exists {
