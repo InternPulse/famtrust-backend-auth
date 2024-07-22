@@ -200,7 +200,7 @@ const docTemplate = `{
                 },
                 "token": {
                     "type": "string",
-                    "example": "auth-token"
+                    "example": "b6d4a7e1d2d841a1afe874a2a5c15d8b"
                 }
             }
         },

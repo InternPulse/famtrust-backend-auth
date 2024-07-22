@@ -23,7 +23,7 @@ type validateSampleResponse200 struct {
 	StatusCode uint   `example:"200"`
 	Status     string `example:"success"`
 	Message    string `example:"Request successful"`
-	Token      string `example:"auth-token"`
+	Token      string `example:"b6d4a7e1d2d841a1afe874a2a5c15d8b"`
 	Data       struct {
 		User validateSampleResponse200User
 	}
