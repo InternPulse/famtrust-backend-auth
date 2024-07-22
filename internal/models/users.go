@@ -67,3 +67,11 @@ func (u *UserModels) PasswordMatches(user *interfaces.User, plainText string) (b
 
 	return true, nil
 }
+
+func (u *UserModels) GetUserProfileByID(userID uuid.UUID) (*interfaces.UserProfile, error) {
+	var profile interfaces.UserProfile
+	if err := u.DB.Where("user_id = ?", userID).First(&profile).Error; err != nil {
+		return nil, err
+	}
+	return &profile, nil
+}
