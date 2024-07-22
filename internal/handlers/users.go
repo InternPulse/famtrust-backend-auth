@@ -19,10 +19,11 @@ type UserHandlers struct {
 // @ID				login
 // @Accept			json
 // @Produce		json
-// @Failure		401
-// @Failure		500
-// @Success		200
-// @Param			credentials	body		loginRequest	true	"User Credentials"
+// @Failure		401	{object}	loginSampleResponseError401
+// @Failure		500	{object}	loginSampleResponseError500
+// @Success		200	{object}	loginSampleResponse200
+// @Router			/login [post]
+// @Param			credentials	body	loginRequest	true	"User Credentials"
 // @Router			/login [post]
 func (uh *UserHandlers) Login(c *gin.Context) {
 	var loginPayload loginRequest
@@ -30,8 +31,9 @@ func (uh *UserHandlers) Login(c *gin.Context) {
 	err := c.ShouldBindBodyWithJSON(&loginPayload)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, loginResponse{
-			StatusCode:    http.StatusBadRequest,
-			StatusMessage: "error",
+			StatusCode: http.StatusBadRequest,
+			Status:     "error",
+			Message:    "Invalid Credentials",
 		})
 		return
 	}
@@ -40,8 +42,9 @@ func (uh *UserHandlers) Login(c *gin.Context) {
 	user, err := uh.models.Users().GetUserByEmail(loginPayload.Email)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, loginResponse{
-			StatusCode:    http.StatusUnauthorized,
-			StatusMessage: "error",
+			StatusCode: http.StatusUnauthorized,
+			Status:     "error",
+			Message:    "Invalid Credentials",
 		})
 		return
 	}
@@ -49,8 +52,9 @@ func (uh *UserHandlers) Login(c *gin.Context) {
 	valid, err := uh.models.Users().PasswordMatches(user, loginPayload.Password)
 	if err != nil || !valid {
 		c.JSON(http.StatusUnauthorized, loginResponse{
-			StatusCode:    http.StatusUnauthorized,
-			StatusMessage: "error",
+			StatusCode: http.StatusUnauthorized,
+			Status:     "error",
+			Message:    "Invalid Credentials",
 		})
 		return
 	}
@@ -58,15 +62,17 @@ func (uh *UserHandlers) Login(c *gin.Context) {
 	token, err := jwtmod.GenerateJWT(user)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, loginResponse{
-			StatusCode:    http.StatusInternalServerError,
-			StatusMessage: "error",
+			StatusCode: http.StatusInternalServerError,
+			Status:     "error",
+			Message:    "An error has occured",
 		})
 	}
 
 	payload := loginResponse{
-		StatusCode:    http.StatusOK,
-		StatusMessage: "success",
-		Token:         token,
+		StatusCode: http.StatusOK,
+		Status:     "success",
+		Message:    "User logged in successfully",
+		Token:      token,
 	}
 
 	c.JSON(http.StatusOK, payload)
@@ -78,17 +84,18 @@ func (uh *UserHandlers) Login(c *gin.Context) {
 // @ID				validate
 // @Accept			json
 // @Produce		json
-// @Failure		401
-// @Failure		500
-// @Success		200
-// @Security BearerAuth
+// @Failure		401	{object}	loginSampleResponseError401
+// @Failure		500	{object}	loginSampleResponseError500
+// @Success		200	{object}	validateSampleResponse200
+// @Security		BearerAuth
 // @Router			/validate [get]
 func (uh *UserHandlers) Validate(c *gin.Context) {
 	UserID, exists := c.Get("UserID")
 	if !exists {
 		c.JSON(http.StatusInternalServerError, loginResponse{
-			StatusCode:    http.StatusInternalServerError,
-			StatusMessage: "error",
+			StatusCode: http.StatusInternalServerError,
+			Status:     "error",
+			Message:    "An error occured",
 		})
 		return
 	}
@@ -96,8 +103,9 @@ func (uh *UserHandlers) Validate(c *gin.Context) {
 	token, exists := c.Get("token")
 	if !exists {
 		c.JSON(http.StatusInternalServerError, loginResponse{
-			StatusCode:    http.StatusInternalServerError,
-			StatusMessage: "error",
+			StatusCode: http.StatusInternalServerError,
+			Status:     "error",
+			Message:    "An error occured",
 		})
 		return
 	}
@@ -106,27 +114,41 @@ func (uh *UserHandlers) Validate(c *gin.Context) {
 	user, err := uh.models.Users().GetUserByID(UserID.(uuid.UUID))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, loginResponse{
-			StatusCode:    http.StatusInternalServerError,
-			StatusMessage: "error",
+			StatusCode: http.StatusInternalServerError,
+			Status:     "error",
+			Message:    "An error occured",
 		})
 		return
 	}
 
+	permissions := func() []string {
+		var list []string
+		for _, perm := range user.Role.Permissions {
+			list = append(list, perm.ID)
+		}
+		return list
+	}
+
 	// user payload
-	Role := Role{
-		ID:          user.Role.ID,
-		Permissions: user.Role.Permissions,
+	role := role{
+		Id:          user.Role.ID,
+		Permissions: permissions(),
 	}
 	userPayload := loginUserData{
-		ID:    user.ID,
-		Email: user.Email,
-		Role:  Role,
+		Id:         user.ID,
+		Email:      user.Email,
+		Has2FA:     user.Has2FA,
+		IsVerified: user.IsVerified,
+		IsFreezed:  user.IsFreezed,
+		LastLogin:  user.LastLogin,
+		Role:       role,
 	}
 
 	payload := loginResponse{
-		StatusCode:    http.StatusOK,
-		StatusMessage: "success",
-		Token:         token.(string),
+		StatusCode: http.StatusOK,
+		Status:     "success",
+		Message:    "User session is valid",
+		Token:      token.(string),
 		Data: map[string]loginUserData{
 			"user": userPayload,
 		},
