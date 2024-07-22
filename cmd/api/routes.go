@@ -40,7 +40,7 @@ func (app *Config) routes() *gin.Engine {
 	// v1.GET("/verify-2fa", app.Handlers.Users().Verify2FA)
 
 	// // User & UserProfile Routes
-	// v1.GET("/user/profile", app.Handlers.Users().GetUserInFull)
+	v1.Use(app.Handlers.AuthMiddleware()).GET("/profile", app.Handlers.Users().GetUserProfileByID)
 	// v1.POST("/user/create", app.Handlers.Users().CreateUser)
 	// v1.PUT("/user/update", app.Handlers.Users().UpdateUserByID)
 	// v1.DELETE("/user/delete", app.Handlers.Users().DeleteUserByID)
