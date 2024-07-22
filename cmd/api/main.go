@@ -20,13 +20,13 @@ type Config struct {
 	Handlers interfaces.Handlers
 }
 
-// @title			FamTrust API Backend - Auth
-// @version		1.0
-// @description	This is the Authentication and Authrization micro-service for the FamTrust Web App.
-// @BasePath		/api/v1/
-// @securityDefinitions.apiKey BearerAuth
-// @name Authorization
-// @in header
+//	@title						FamTrust API Backend - Auth
+//	@version					1.0
+//	@description				This is the Authentication and Authrization micro-service for the FamTrust Web App.
+//	@BasePath					/api/v1/
+//	@securityDefinitions.apiKey	BearerAuth
+//	@name						Authorization
+//	@in							header
 func main() {
 	// load env vars
 	if err := godotenv.Load(); err != nil {
