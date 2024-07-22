@@ -15,14 +15,13 @@ type UserHandlers struct {
 
 // @Summary		Login to FamTrust
 // @Description	Login to FamTrust
-// @Tags			Auth
+// @Tags			User-Authentication
 // @ID				login
 // @Accept			json
 // @Produce		json
 // @Failure		401	{object}	loginSampleResponseError401
 // @Failure		500	{object}	loginSampleResponseError500
 // @Success		200	{object}	loginSampleResponse200
-// @Router			/login [post]
 // @Param			credentials	body	loginRequest	true	"User Credentials"
 // @Router			/login [post]
 func (uh *UserHandlers) Login(c *gin.Context) {
@@ -80,7 +79,7 @@ func (uh *UserHandlers) Login(c *gin.Context) {
 
 // @Summary		Validate User Login Token
 // @Description	Validate User Login Token
-// @Tags			Auth
+// @Tags			User-Authentication
 // @ID				validate
 // @Accept			json
 // @Produce		json
