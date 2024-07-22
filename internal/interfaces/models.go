@@ -59,10 +59,10 @@ type User struct {
 	Email         string      `gorm:"not null;unique"`
 	Password_hash string      `gorm:"not null"`
 	RoleID        string      `gorm:"not null"`
-	Has_2FA       bool        `gorm:"not null"`
-	Is_verified   bool        `gorm:"not null"`
-	Is_freezed    bool        `gorm:"not null"`
-	Last_login    time.Time   `gorm:"not null"`
+	Has2FA        bool        `gorm:"not null"`
+	IsVerified    bool        `gorm:"not null"`
+	IsFreezed     bool        `gorm:"not null"`
+	LastLogin     time.Time   `gorm:"not null"`
 	Role          Role        `gorm:"foreignKey:RoleID;references:ID"`
 	UserProfile   UserProfile `gorm:"foreignKey:UserID;references:ID;constraints:OnUpdate:CASCADE,OnDelete:CASCADE"`
 }
@@ -70,8 +70,8 @@ type User struct {
 type UserProfile struct {
 	UUIDModel
 	UserID              uuid.UUID
-	First_name          string `gorm:"not null"`
-	Last_name           string `gorm:"not null"`
+	FirstName           string `gorm:"not null"`
+	LastName            string `gorm:"not null"`
 	Bio                 string `gorm:"not null"`
 	NIN                 uint   `gorm:"not null;unique"`
 	BVN                 uint   `gorm:"not null;unique"`
