@@ -49,6 +49,57 @@ definitions:
         example: 500
         type: integer
     type: object
+  handlers.profileSampleResponse200:
+    properties:
+      data:
+        properties:
+          profile:
+            properties:
+              bio:
+                example: The best FamTrust user of all time.
+                type: string
+              bvn:
+                example: 35473783473
+                type: integer
+              createdAt:
+                example: "2024-07-22T14:30:00Z"
+                type: string
+              firstName:
+                example: Famtrust
+                type: string
+              id:
+                example: a5c9f82e-6b7a-4a53-a81c-82b1e2f453a6
+                type: string
+              lastName:
+                example: Guru
+                type: string
+              nin:
+                example: 35473745433
+                type: integer
+              profile_picture_url:
+                example: https://image.famtrust.biz/dkkjieikdjfoej.jpg
+                type: string
+              updatedAt:
+                example: "2024-07-22T14:30:00Z"
+                type: string
+              userID:
+                example: d38f91b2-dc3b-4f9d-aeb4-7b95c91e9d08
+                type: string
+            type: object
+        type: object
+      message:
+        example: Request successful
+        type: string
+      status:
+        example: success
+        type: string
+      statusCode:
+        example: 200
+        type: integer
+      token:
+        example: b6d4a7e1d2d841a1afe874a2a5c15d8b
+        type: string
+    type: object
   handlers.validateSampleResponse200:
     properties:
       data:
@@ -78,7 +129,7 @@ definitions:
         example: true
         type: boolean
       id:
-        example: user-id
+        example: d38f91b2-dc3b-4f9d-aeb4-7b95c91e9d08
         type: string
       isFreezed:
         example: true
@@ -142,7 +193,33 @@ paths:
             $ref: '#/definitions/handlers.loginSampleResponseError500'
       summary: Login to FamTrust
       tags:
-      - Auth
+      - User-Authentication
+  /profile:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve User Profile Details
+      operationId: profile
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.profileSampleResponse200'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.loginSampleResponseError401'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.loginSampleResponseError500'
+      security:
+      - BearerAuth: []
+      summary: Retrieve User Profile Details
+      tags:
+      - User-Profiles
   /validate:
     get:
       consumes:
@@ -168,7 +245,7 @@ paths:
       - BearerAuth: []
       summary: Validate User Login Token
       tags:
-      - Auth
+      - User-Authentication
 securityDefinitions:
   BearerAuth:
     in: header
