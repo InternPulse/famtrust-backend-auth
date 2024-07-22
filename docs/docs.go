@@ -25,7 +25,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Auth"
+                    "User-Authentication"
                 ],
                 "summary": "Login to FamTrust",
                 "operationId": "login",
@@ -62,6 +62,47 @@ const docTemplate = `{
                 }
             }
         },
+        "/profile": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieve User Profile Details",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User-Profiles"
+                ],
+                "summary": "Retrieve User Profile Details",
+                "operationId": "profile",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.profileSampleResponse200"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.loginSampleResponseError401"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.loginSampleResponseError500"
+                        }
+                    }
+                }
+            }
+        },
         "/validate": {
             "get": {
                 "security": [
@@ -77,7 +118,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Auth"
+                    "User-Authentication"
                 ],
                 "summary": "Validate User Login Token",
                 "operationId": "validate",
@@ -175,6 +216,77 @@ const docTemplate = `{
                 }
             }
         },
+        "handlers.profileSampleResponse200": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "object",
+                    "properties": {
+                        "profile": {
+                            "type": "object",
+                            "properties": {
+                                "bio": {
+                                    "type": "string",
+                                    "example": "The best FamTrust user of all time."
+                                },
+                                "bvn": {
+                                    "type": "integer",
+                                    "example": 35473783473
+                                },
+                                "createdAt": {
+                                    "type": "string",
+                                    "example": "2024-07-22T14:30:00Z"
+                                },
+                                "firstName": {
+                                    "type": "string",
+                                    "example": "Famtrust"
+                                },
+                                "id": {
+                                    "type": "string",
+                                    "example": "a5c9f82e-6b7a-4a53-a81c-82b1e2f453a6"
+                                },
+                                "lastName": {
+                                    "type": "string",
+                                    "example": "Guru"
+                                },
+                                "nin": {
+                                    "type": "integer",
+                                    "example": 35473745433
+                                },
+                                "profile_picture_url": {
+                                    "type": "string",
+                                    "example": "https://image.famtrust.biz/dkkjieikdjfoej.jpg"
+                                },
+                                "updatedAt": {
+                                    "type": "string",
+                                    "example": "2024-07-22T14:30:00Z"
+                                },
+                                "userID": {
+                                    "type": "string",
+                                    "example": "d38f91b2-dc3b-4f9d-aeb4-7b95c91e9d08"
+                                }
+                            }
+                        }
+                    }
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Request successful"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "success"
+                },
+                "statusCode": {
+                    "type": "integer",
+                    "example": 200
+                },
+                "token": {
+                    "type": "string",
+                    "example": "b6d4a7e1d2d841a1afe874a2a5c15d8b"
+                }
+            }
+        },
         "handlers.validateSampleResponse200": {
             "type": "object",
             "properties": {
@@ -217,7 +329,7 @@ const docTemplate = `{
                 },
                 "id": {
                     "type": "string",
-                    "example": "user-id"
+                    "example": "d38f91b2-dc3b-4f9d-aeb4-7b95c91e9d08"
                 },
                 "isFreezed": {
                     "type": "boolean",
