@@ -14,8 +14,9 @@ func (h *Handlers) AuthMiddleware() gin.HandlerFunc {
 		tokenString := c.GetHeader("Authorization")
 		if tokenString == "" || !strings.HasPrefix(tokenString, "Bearer ") {
 			c.JSON(http.StatusUnauthorized, loginResponse{
-				StatusCode:    http.StatusUnauthorized,
-				StatusMessage: "error",
+				StatusCode: http.StatusUnauthorized,
+				Status:     "error",
+				Message:    "Invalid Token",
 			})
 			c.Abort()
 			return
@@ -30,8 +31,9 @@ func (h *Handlers) AuthMiddleware() gin.HandlerFunc {
 		})
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, loginResponse{
-				StatusCode:    http.StatusUnauthorized,
-				StatusMessage: "error",
+				StatusCode: http.StatusUnauthorized,
+				Status:     "error",
+				Message:    "Invalid Token",
 			})
 			c.Abort()
 			return
@@ -39,8 +41,9 @@ func (h *Handlers) AuthMiddleware() gin.HandlerFunc {
 
 		if !token.Valid {
 			c.JSON(http.StatusUnauthorized, loginResponse{
-				StatusCode:    http.StatusUnauthorized,
-				StatusMessage: "error",
+				StatusCode: http.StatusUnauthorized,
+				Status:     "error",
+				Message:    "Invalid Token",
 			})
 			c.Abort()
 			return
