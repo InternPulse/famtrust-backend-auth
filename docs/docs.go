@@ -42,13 +42,22 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK"
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.loginSampleResponse200"
+                        }
                     },
                     "401": {
-                        "description": "Unauthorized"
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.loginSampleResponseError401"
+                        }
                     },
                     "500": {
-                        "description": "Internal Server Error"
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.loginSampleResponseError500"
+                        }
                     }
                 }
             }
@@ -74,13 +83,22 @@ const docTemplate = `{
                 "operationId": "validate",
                 "responses": {
                     "200": {
-                        "description": "OK"
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.validateSampleResponse200"
+                        }
                     },
                     "401": {
-                        "description": "Unauthorized"
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.loginSampleResponseError401"
+                        }
                     },
                     "500": {
-                        "description": "Internal Server Error"
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.loginSampleResponseError500"
+                        }
                     }
                 }
             }
@@ -99,6 +117,141 @@ const docTemplate = `{
                 },
                 "password": {
                     "type": "string"
+                }
+            }
+        },
+        "handlers.loginSampleResponse200": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "example": "User Logged in successfully"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "success"
+                },
+                "statusCode": {
+                    "type": "integer",
+                    "example": 200
+                },
+                "token": {
+                    "type": "string",
+                    "example": "b6d4a7e1d2d841a1afe874a2a5c15d8b"
+                }
+            }
+        },
+        "handlers.loginSampleResponseError401": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "example": "Invalid Credentials"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "error"
+                },
+                "statusCode": {
+                    "type": "integer",
+                    "example": 401
+                }
+            }
+        },
+        "handlers.loginSampleResponseError500": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "example": "An error occured"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "error"
+                },
+                "statusCode": {
+                    "type": "integer",
+                    "example": 500
+                }
+            }
+        },
+        "handlers.validateSampleResponse200": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "object",
+                    "properties": {
+                        "user": {
+                            "$ref": "#/definitions/handlers.validateSampleResponse200User"
+                        }
+                    }
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Request successful"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "success"
+                },
+                "statusCode": {
+                    "type": "integer",
+                    "example": 200
+                },
+                "token": {
+                    "type": "string",
+                    "example": "auth-token"
+                }
+            }
+        },
+        "handlers.validateSampleResponse200User": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "user@example.com"
+                },
+                "has2FA": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "id": {
+                    "type": "string",
+                    "example": "user-id"
+                },
+                "isFreezed": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "isVerified": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "lastLogin": {
+                    "type": "string",
+                    "example": "2024-07-22T14:30:00Z"
+                },
+                "role": {
+                    "$ref": "#/definitions/handlers.validateSampleResponseRole"
+                }
+            }
+        },
+        "handlers.validateSampleResponseRole": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "example": "admin"
+                },
+                "permissions": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "canTransact",
+                        " canWithdraw"
+                    ]
                 }
             }
         }

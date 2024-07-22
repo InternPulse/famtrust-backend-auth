@@ -10,6 +10,101 @@ definitions:
     - email
     - password
     type: object
+  handlers.loginSampleResponse200:
+    properties:
+      message:
+        example: User Logged in successfully
+        type: string
+      status:
+        example: success
+        type: string
+      statusCode:
+        example: 200
+        type: integer
+      token:
+        example: b6d4a7e1d2d841a1afe874a2a5c15d8b
+        type: string
+    type: object
+  handlers.loginSampleResponseError401:
+    properties:
+      message:
+        example: Invalid Credentials
+        type: string
+      status:
+        example: error
+        type: string
+      statusCode:
+        example: 401
+        type: integer
+    type: object
+  handlers.loginSampleResponseError500:
+    properties:
+      message:
+        example: An error occured
+        type: string
+      status:
+        example: error
+        type: string
+      statusCode:
+        example: 500
+        type: integer
+    type: object
+  handlers.validateSampleResponse200:
+    properties:
+      data:
+        properties:
+          user:
+            $ref: '#/definitions/handlers.validateSampleResponse200User'
+        type: object
+      message:
+        example: Request successful
+        type: string
+      status:
+        example: success
+        type: string
+      statusCode:
+        example: 200
+        type: integer
+      token:
+        example: auth-token
+        type: string
+    type: object
+  handlers.validateSampleResponse200User:
+    properties:
+      email:
+        example: user@example.com
+        type: string
+      has2FA:
+        example: true
+        type: boolean
+      id:
+        example: user-id
+        type: string
+      isFreezed:
+        example: true
+        type: boolean
+      isVerified:
+        example: true
+        type: boolean
+      lastLogin:
+        example: "2024-07-22T14:30:00Z"
+        type: string
+      role:
+        $ref: '#/definitions/handlers.validateSampleResponseRole'
+    type: object
+  handlers.validateSampleResponseRole:
+    properties:
+      id:
+        example: admin
+        type: string
+      permissions:
+        example:
+        - canTransact
+        - ' canWithdraw'
+        items:
+          type: string
+        type: array
+    type: object
 info:
   contact: {}
   description: This is the Authentication and Authrization micro-service for the FamTrust
@@ -35,10 +130,16 @@ paths:
       responses:
         "200":
           description: OK
+          schema:
+            $ref: '#/definitions/handlers.loginSampleResponse200'
         "401":
           description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.loginSampleResponseError401'
         "500":
           description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.loginSampleResponseError500'
       summary: Login to FamTrust
       tags:
       - Auth
@@ -53,10 +154,16 @@ paths:
       responses:
         "200":
           description: OK
+          schema:
+            $ref: '#/definitions/handlers.validateSampleResponse200'
         "401":
           description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.loginSampleResponseError401'
         "500":
           description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.loginSampleResponseError500'
       security:
       - BearerAuth: []
       summary: Validate User Login Token
