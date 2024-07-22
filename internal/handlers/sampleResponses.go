@@ -1,5 +1,11 @@
 package handlers
 
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
+
 type loginSampleResponse200 struct {
 	StatusCode uint   `example:"200"`
 	Status     string `example:"success"`
@@ -26,6 +32,27 @@ type validateSampleResponse200 struct {
 	Token      string `example:"b6d4a7e1d2d841a1afe874a2a5c15d8b"`
 	Data       struct {
 		User validateSampleResponse200User
+	}
+}
+
+type profileSampleResponse200 struct {
+	StatusCode uint   `example:"200"`
+	Status     string `example:"success"`
+	Message    string `example:"Request successful"`
+	Token      string `example:"b6d4a7e1d2d841a1afe874a2a5c15d8b"`
+	Data       struct {
+		Profile struct {
+			ID                  uuid.UUID
+			UserID              uuid.UUID
+			FirstName           string
+			LastName            string
+			Bio                 string
+			NIN                 uint
+			BVN                 uint
+			Profile_picture_url string
+			CreatedAt           time.Time
+			UpdatedAt           time.Time
+		}
 	}
 }
 
