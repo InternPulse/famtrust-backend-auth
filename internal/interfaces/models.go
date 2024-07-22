@@ -17,6 +17,7 @@ type UserModels interface {
 	CreateUser(user *User) error
 	GetUserByID(userID uuid.UUID) (*User, error)
 	GetUserByEmail(email string) (*User, error)
+	GetUserProfileByID(userID uuid.UUID) (*UserProfile, error)
 	UpdateUser(user *User) error
 	DeleteUserByID(userID uuid.UUID) error
 	PasswordMatches(user *User, plainText string) (bool, error)
