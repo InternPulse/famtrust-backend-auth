@@ -57,15 +57,15 @@ func (u *UUIDModel) BeforeCreate(tx *gorm.DB) (err error) {
 
 type User struct {
 	UUIDModel
-	Email         string      `gorm:"not null;unique"`
-	Password_hash string      `gorm:"not null"`
-	RoleID        string      `gorm:"not null"`
-	Has2FA        bool        `gorm:"not null"`
-	IsVerified    bool        `gorm:"not null"`
-	IsFreezed     bool        `gorm:"not null"`
-	LastLogin     time.Time   `gorm:"not null"`
-	Role          Role        `gorm:"foreignKey:RoleID;references:ID"`
-	UserProfile   UserProfile `gorm:"foreignKey:UserID;references:ID;constraints:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	Email        string      `gorm:"not null;unique"`
+	PasswordHash string      `gorm:"not null"`
+	RoleID       string      `gorm:"not null"`
+	Has2FA       bool        `gorm:"column:has_2fa;not null"`
+	IsVerified   bool        `gorm:"not null"`
+	IsFreezed    bool        `gorm:"not null"`
+	LastLogin    time.Time   `gorm:"not null"`
+	Role         Role        `gorm:"foreignKey:RoleID;references:ID"`
+	UserProfile  UserProfile `gorm:"foreignKey:UserID;references:ID;constraints:OnUpdate:CASCADE,OnDelete:CASCADE"`
 }
 
 type UserProfile struct {

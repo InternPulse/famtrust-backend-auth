@@ -54,7 +54,7 @@ func (u *UserModels) DeleteUserByID(userID uuid.UUID) error {
 // with the hash we have stored for a given user in the database. If the password
 // and hash match, we return true; otherwise, we return false.
 func (u *UserModels) PasswordMatches(user *interfaces.User, plainText string) (bool, error) {
-	err := bcrypt.CompareHashAndPassword([]byte(user.Password_hash), []byte(plainText))
+	err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(plainText))
 	if err != nil {
 		switch {
 		case errors.Is(err, bcrypt.ErrMismatchedHashAndPassword):
