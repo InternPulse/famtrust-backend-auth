@@ -1,7 +1,8 @@
 package handlers
 
 import (
-	"github.com/InternPulse/famtrust-backend-auth/internal/interfaces"
+	"time"
+
 	"github.com/google/uuid"
 )
 
@@ -11,19 +12,24 @@ type loginRequest struct {
 }
 
 type loginResponse struct {
-	StatusCode    uint                     `json:"status_code" binding:"required"`
-	StatusMessage string                   `json:"status_message" binding:"required"`
-	Token         string                   `json:"token,omitempty"`
-	Data          map[string]loginUserData `json:"data,omitempty"`
+	StatusCode uint
+	Status     string
+	Message    string
+	Token      string                   `json:"token,omitempty"`
+	Data       map[string]loginUserData `json:"data,omitempty"`
 }
 
 type loginUserData struct {
-	ID    uuid.UUID `json:"id" binding:"required"`
-	Email string    `json:"email" binding:"required"`
-	Role  Role      `json:"role" binding:"required"`
+	Id         uuid.UUID
+	Email      string
+	Role       role
+	Has2FA     bool
+	IsVerified bool
+	IsFreezed  bool
+	LastLogin  time.Time
 }
 
-type Role struct {
-	ID          string                  `json:"id" binding:"required"`
-	Permissions []interfaces.Permission `json:"permissions" binding:"required"`
+type role struct {
+	Id          string   `json:"id" binding:"required"`
+	Permissions []string `json:"permissions" binding:"required"`
 }
