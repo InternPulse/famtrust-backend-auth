@@ -12,21 +12,21 @@ type loginRequest struct {
 }
 
 type loginResponse struct {
-	StatusCode uint
-	Status     string
-	Message    string
+	StatusCode uint                     `json:"statusCode"`
+	Status     string                   `json:status"`
+	Message    string                   `json:"message"`
 	Token      string                   `json:"token,omitempty"`
 	Data       map[string]loginUserData `json:"data,omitempty"`
 }
 
 type loginUserData struct {
-	Id         uuid.UUID
-	Email      string
-	Role       role
-	Has2FA     bool
-	IsVerified bool
-	IsFreezed  bool
-	LastLogin  time.Time
+	Id         uuid.UUID `json:"id"`
+	Email      string    `json:"email"`
+	Role       role      `json:"role"`
+	Has2FA     bool      `json:"has2FA"`
+	IsVerified bool      `json:"isVerified"`
+	IsFreezed  bool      `json:"isFreezed"`
+	LastLogin  time.Time `json:"lastLogin"`
 }
 
 type role struct {
