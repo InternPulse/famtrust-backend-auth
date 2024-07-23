@@ -49,7 +49,7 @@ func newSMTPServer() *mail.SMTPServer {
 	mailer.Username = username
 	mailer.Password = password
 
-	mailer.Encryption = mail.EncryptionNone
+	mailer.Encryption = mail.EncryptionSTARTTLS
 	mailer.ConnectTimeout = 30 * time.Second
 	mailer.SendTimeout = 30 * time.Second
 
