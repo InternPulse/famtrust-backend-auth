@@ -1,9 +1,7 @@
 package handlers
 
 import (
-	"fmt"
 	"net/http"
-	"os"
 
 	"github.com/InternPulse/famtrust-backend-auth/internal/interfaces"
 	"github.com/InternPulse/famtrust-backend-auth/internal/jwtmod"
@@ -38,18 +36,6 @@ func (uh *UserHandlers) Login(c *gin.Context) {
 			Message:    "Invalid Credentials",
 		})
 		return
-	}
-
-	// Send sample email
-	email := interfaces.EmailMsg{
-		Subject:  "Worked",
-		From:     "biz@famtrust.biz",
-		To:       os.Getenv("SAMPLE_TO_EMAIL"),
-		BodyText: "It worked! worked!!",
-	}
-	err = uh.mailer.SendMail(&email)
-	if err != nil {
-		fmt.Printf("Error from Mailer: %v", err)
 	}
 
 	// validate the user against the database
