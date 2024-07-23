@@ -10,8 +10,8 @@ func (h *Handlers) Users() interfaces.UserHandlers {
 	return h.users
 }
 
-func NewHandler(models interfaces.Models) interfaces.Handlers {
+func NewHandler(models interfaces.Models, mailer interfaces.Mailer) interfaces.Handlers {
 	return &Handlers{
-		users: &UserHandlers{models: models},
+		users: &UserHandlers{models: models, mailer: mailer},
 	}
 }
