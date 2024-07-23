@@ -50,9 +50,6 @@ func (u *UserModels) DeleteUserByID(userID uuid.UUID) error {
 	return nil
 }
 
-// PasswordMatches uses Go's bcrypt package to compare a user supplied password
-// with the hash we have stored for a given user in the database. If the password
-// and hash match, we return true; otherwise, we return false.
 func (u *UserModels) PasswordMatches(passwordHash string, plainText string) (bool, error) {
 	err := bcrypt.CompareHashAndPassword([]byte(passwordHash), []byte(plainText))
 	if err != nil {
@@ -74,4 +71,28 @@ func (u *UserModels) GetUserProfileByID(userID uuid.UUID) (*interfaces.UserProfi
 		return nil, err
 	}
 	return &profile, nil
+}
+
+func (u *UserModels) GetUserByNIN(nin int) (*interfaces.User, error) {
+	var user interfaces.User
+	if err := u.DB.Where("nin = ?", nin).First(&user).Error; err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+
+func (u *UserModels) GetUserByBVN(bvn int) (*interfaces.User, error) {
+	var user interfaces.User
+	if err := u.DB.Where("nin = ?", bvn).First(&user).Error; err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+
+func (u *UserModels) SetIsVerified(userID uuid.UUID, value bool) error {
+	// Update the `Active` field of a user with a specific ID
+	if err := u.DB.Model(&interfaces.VerCode{}).Where("user_id = ?", userID).Update("is_verified", value).Error; err != nil {
+		return err
+	}
+	return nil
 }
