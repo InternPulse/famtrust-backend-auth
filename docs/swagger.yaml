@@ -270,8 +270,8 @@ paths:
       - Verifications
   /verify-email:
     get:
-      description: Send User-Email Verification Email
-      operationId: send-verify-email
+      description: Send User-Email Verification Token
+      operationId: send-verify-token
       produces:
       - application/json
       responses:
@@ -283,13 +283,13 @@ paths:
           description: Internal Server Error
       security:
       - BearerAuth: []
-      summary: Send User-Email Verification Email
+      summary: Send User-Email Verification Token
       tags:
       - Verifications
   /verify-email/verify:
     get:
       description: Verify User Email Address via Token
-      operationId: verify-email-code
+      operationId: verify-email-token
       parameters:
       - description: Email verification Token
         in: query

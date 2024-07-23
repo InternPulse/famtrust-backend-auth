@@ -15,10 +15,10 @@ type VerificationHandlers struct {
 	mailer interfaces.Mailer
 }
 
-// @Summary		Send User-Email Verification Email
-// @Description	Send User-Email Verification Email
+// @Summary		Send User-Email Verification Token
+// @Description	Send User-Email Verification Token
 // @Tags			Verifications
-// @ID				send-verify-email
+// @ID				send-verify-token
 // @Security BearerAuth
 // @Produce		json
 // @Failure		400
@@ -105,7 +105,7 @@ func (v *VerificationHandlers) VerifyEmail(c *gin.Context) {
 // @Summary		Verify User Email Address via Token
 // @Description	Verify User Email Address via Token
 // @Tags			Verifications
-// @ID				verify-email-code
+// @ID				verify-email-token
 // @Produce		json
 // @Failure		400
 // @Failure		500
