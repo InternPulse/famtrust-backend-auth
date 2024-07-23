@@ -3,7 +3,6 @@ package jwtmod
 import (
 	"time"
 
-	"github.com/InternPulse/famtrust-backend-auth/internal/interfaces"
 	"github.com/golang-jwt/jwt"
 	"github.com/google/uuid"
 )
@@ -11,30 +10,17 @@ import (
 var JwtKey []byte
 
 type JwtClaim struct {
-	ID    uuid.UUID `json:"id" binding:"required"`
-	Email string    `json:"email" binding:"required"`
-	Role  Role      `json:"role" binding:"required"`
+	ID uuid.UUID `json:"id" binding:"required"`
 	jwt.StandardClaims
 }
 
-type Role struct {
-	ID          string                  `json:"id" binding:"required"`
-	Permissions []interfaces.Permission `json:"permissions" binding:"required"`
-}
-
-func GenerateJWT(user *interfaces.User) (string, error) {
+func GenerateJWT(userID uuid.UUID) (string, error) {
 	// create expiration time
 	expirationTime := time.Now().Add(24 * time.Hour)
 
 	// user claims payload
-	Role := Role{
-		ID:          user.Role.ID,
-		Permissions: user.Role.Permissions,
-	}
 	claims := JwtClaim{
-		ID:    user.ID,
-		Email: user.Email,
-		Role:  Role,
+		ID: userID,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expirationTime.Unix(),
 		},

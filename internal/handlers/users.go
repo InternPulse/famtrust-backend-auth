@@ -58,7 +58,7 @@ func (uh *UserHandlers) Login(c *gin.Context) {
 		return
 	}
 
-	token, err := jwtmod.GenerateJWT(user)
+	token, err := jwtmod.GenerateJWT(user.ID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, loginResponse{
 			StatusCode: http.StatusInternalServerError,
