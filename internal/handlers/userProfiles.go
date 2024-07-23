@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -32,12 +33,22 @@ func (uh *UserHandlers) GetUserProfileByID(c *gin.Context) {
 	// retrieve the user from the database
 	profile, err := uh.models.Users().GetUserProfileByID(UserID.(uuid.UUID))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, loginResponse{
-			StatusCode: http.StatusInternalServerError,
-			Status:     "error",
-			Message:    "An error occured",
-		})
-		return
+		if strings.Contains(err.Error(), "record not found") {
+			c.JSON(http.StatusNotFound, loginResponse{
+				StatusCode: http.StatusNotFound,
+				Status:     "error",
+				Message:    "User doesn't have a profile",
+			})
+			return
+		} else {
+			c.JSON(http.StatusInternalServerError, loginResponse{
+				StatusCode: http.StatusInternalServerError,
+				Status:     "error",
+				Message:    "An error occured",
+			})
+			return
+		}
+
 	}
 
 	payload := gin.H{
