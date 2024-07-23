@@ -14,6 +14,7 @@ func Migrate(db *gorm.DB) error {
 		&interfaces.UserProfile{},
 		&interfaces.Role{},
 		&interfaces.Permission{},
+		&interfaces.VerCode{},
 	)
 	if err != nil {
 		return err
