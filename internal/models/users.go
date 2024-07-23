@@ -91,7 +91,7 @@ func (u *UserModels) GetUserByBVN(bvn int) (*interfaces.User, error) {
 
 func (u *UserModels) SetIsVerified(userID uuid.UUID, value bool) error {
 	// Update the `Active` field of a user with a specific ID
-	if err := u.DB.Model(&interfaces.User{}).Where("user_id = ?", userID).Update("is_verified", value).Error; err != nil {
+	if err := u.DB.Model(&interfaces.User{}).Where("id = ?", userID).Update("is_verified", value).Error; err != nil {
 		return err
 	}
 	return nil
