@@ -53,8 +53,8 @@ func (u *UserModels) DeleteUserByID(userID uuid.UUID) error {
 // PasswordMatches uses Go's bcrypt package to compare a user supplied password
 // with the hash we have stored for a given user in the database. If the password
 // and hash match, we return true; otherwise, we return false.
-func (u *UserModels) PasswordMatches(user *interfaces.User, plainText string) (bool, error) {
-	err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(plainText))
+func (u *UserModels) PasswordMatches(passwordHash string, plainText string) (bool, error) {
+	err := bcrypt.CompareHashAndPassword([]byte(passwordHash), []byte(plainText))
 	if err != nil {
 		switch {
 		case errors.Is(err, bcrypt.ErrMismatchedHashAndPassword):

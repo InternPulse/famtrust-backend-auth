@@ -20,7 +20,7 @@ type UserModels interface {
 	GetUserProfileByID(userID uuid.UUID) (*UserProfile, error)
 	UpdateUser(user *User) error
 	DeleteUserByID(userID uuid.UUID) error
-	PasswordMatches(user *User, plainText string) (bool, error)
+	PasswordMatches(passswordHash string, plainText string) (bool, error)
 }
 
 type UserRoles interface {

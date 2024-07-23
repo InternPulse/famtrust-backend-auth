@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/InternPulse/famtrust-backend-auth/internal/interfaces"
@@ -48,7 +49,7 @@ func (uh *UserHandlers) Login(c *gin.Context) {
 		return
 	}
 
-	valid, err := uh.models.Users().PasswordMatches(user, loginPayload.Password)
+	valid, err := uh.models.Users().PasswordMatches(user.PasswordHash, loginPayload.Password)
 	if err != nil || !valid {
 		c.JSON(http.StatusUnauthorized, loginResponse{
 			StatusCode: http.StatusUnauthorized,
