@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/InternPulse/famtrust-backend-auth/internal/interfaces"
