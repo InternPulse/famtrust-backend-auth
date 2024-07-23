@@ -246,6 +246,73 @@ paths:
       summary: Validate User Login Token
       tags:
       - User-Authentication
+  /verify-bvn:
+    get:
+      description: Verify User Signup BVN
+      operationId: verify-bvn
+      parameters:
+      - description: BVN
+        in: query
+        name: bvn
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      summary: Verify User Signup BVN
+      tags:
+      - Verifications
+  /verify-email:
+    get:
+      description: Verify User Email Address
+      operationId: verify-email
+      parameters:
+      - description: Email verification Token
+        in: query
+        name: code
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      security:
+      - BearerAuth: []
+      summary: Verify User Email Address
+      tags:
+      - Verifications
+  /verify-nin:
+    get:
+      description: Verify User Signup NIN
+      operationId: verify-nin
+      parameters:
+      - description: NIN
+        in: query
+        name: nin
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      summary: Verify User Signup NIN
+      tags:
+      - Verifications
 securityDefinitions:
   BearerAuth:
     in: header
