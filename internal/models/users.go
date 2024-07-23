@@ -22,7 +22,7 @@ func (u *UserModels) CreateUser(user *interfaces.User) error {
 
 func (u *UserModels) GetUserByID(userID uuid.UUID) (*interfaces.User, error) {
 	var user interfaces.User
-	if err := u.DB.First(&user, userID).Error; err != nil {
+	if err := u.DB.Preload("Role").Preload("Role.Permissions").Where("id = ?", userID).First(&user).Error; err != nil {
 		return nil, err
 	}
 	return &user, nil
@@ -30,7 +30,7 @@ func (u *UserModels) GetUserByID(userID uuid.UUID) (*interfaces.User, error) {
 
 func (u *UserModels) GetUserByEmail(email string) (*interfaces.User, error) {
 	var user interfaces.User
-	if err := u.DB.Where("email = ?", email).First(&user).Error; err != nil {
+	if err := u.DB.Where("email = ?", email).Preload("Role").Preload("Role.Permissions").First(&user).Error; err != nil {
 		return nil, err
 	}
 	return &user, nil
