@@ -49,7 +49,7 @@ func (h *Handlers) AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		c.Set("token", token)
+		c.Set("token", token.Raw)
 		c.Set("UserID", claims.ID)
 		c.Next()
 	}
