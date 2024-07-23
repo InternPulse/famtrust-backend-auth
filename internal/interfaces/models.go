@@ -11,6 +11,7 @@ type Models interface {
 	Users() UserModels
 	Roles() UserRoles
 	Permissions() UserPermissions
+	VerCodes() VerCodeModels
 }
 
 type UserModels interface {
@@ -21,6 +22,9 @@ type UserModels interface {
 	UpdateUser(user *User) error
 	DeleteUserByID(userID uuid.UUID) error
 	PasswordMatches(passswordHash string, plainText string) (bool, error)
+	GetUserByBVN(bvn int) (*User, error)
+	GetUserByNIN(nin int) (*User, error)
+	SetIsVerified(userID uuid.UUID, value bool) error
 }
 
 type UserRoles interface {
@@ -37,6 +41,12 @@ type UserPermissions interface {
 	CreatePermission(perm *Permission) error
 	UpdatePermission(perm *Permission) error
 	DeletePermission(perm Permission) error
+}
+
+type VerCodeModels interface {
+	CreateVerificationCode(verCode *VerCode) error
+	GetCodeByID(codeID uuid.UUID) (*VerCode, error)
+	DeleteCodeByID(codeID uuid.UUID) error
 }
 
 // Create uuid model.
@@ -63,6 +73,7 @@ type User struct {
 	Has2FA       bool        `gorm:"column:has_2fa;not null"`
 	IsVerified   bool        `gorm:"not null"`
 	IsFreezed    bool        `gorm:"not null"`
+	DefaultGroup uuid.UUID   `gorm:"not null"`
 	LastLogin    time.Time   `gorm:"not null"`
 	Role         Role        `gorm:"foreignKey:RoleID;references:ID"`
 	UserProfile  UserProfile `gorm:"foreignKey:UserID;references:ID;constraints:OnUpdate:CASCADE,OnDelete:CASCADE"`
@@ -74,8 +85,8 @@ type UserProfile struct {
 	FirstName           string `gorm:"not null"`
 	LastName            string `gorm:"not null"`
 	Bio                 string `gorm:"not null"`
-	NIN                 uint   `gorm:"not null;unique"`
-	BVN                 uint   `gorm:"not null;unique"`
+	NIN                 uint   `gorm:"unique"`
+	BVN                 uint   `gorm:"unique"`
 	Profile_picture_url string `gorm:"not null"`
 }
 
@@ -93,4 +104,9 @@ type Permission struct {
 	UpdatedAt time.Time
 	DeletedAt gorm.DeletedAt `gorm:"index"`
 	Roles     []Role         `gorm:"many2many:role_permissions;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+}
+
+type VerCode struct {
+	UUIDModel
+	UserID uuid.UUID
 }
