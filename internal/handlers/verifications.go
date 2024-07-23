@@ -15,19 +15,17 @@ type VerificationHandlers struct {
 	mailer interfaces.Mailer
 }
 
-// @Summary		Verify User Email Address
-// @Description	Verify User Email Address
+// @Summary		Send User-Email Verification Email
+// @Description	Send User-Email Verification Email
 // @Tags			Verifications
-// @ID				verify-email
+// @ID				send-verify-email
 // @Security BearerAuth
 // @Produce		json
 // @Failure		400
 // @Failure		500
 // @Success		200
-// @Param code query string false "Email verification Token"
 // @Router			/verify-email [get]
 func (v *VerificationHandlers) VerifyEmail(c *gin.Context) {
-	verCode := c.Query("code")
 
 	UserID, exists := c.Get("UserID")
 	if !exists {
@@ -57,10 +55,8 @@ func (v *VerificationHandlers) VerifyEmail(c *gin.Context) {
 			Message:    "User is already verified",
 		})
 		return
-	}
 
-	// If user isn't verified and no token was passed in
-	if !user.IsVerified && verCode == "" {
+	} else {
 
 		verCode := interfaces.VerCode{
 			UserID: user.ID,
@@ -77,14 +73,14 @@ func (v *VerificationHandlers) VerifyEmail(c *gin.Context) {
 		}
 
 		// create verification link
-		verLink := c.Request.URL.Path + "?code=" + verCode.ID.String()
+		verLink := c.Request.Host + c.Request.URL.Path + "/verify" + "?code=" + verCode.ID.String()
 
 		// send as email
 		verEmail := interfaces.EmailMsg{
 			Subject:  "Verify your FamTrust Email",
 			From:     "biz@famtrust.biz",
 			To:       user.Email,
-			BodyText: fmt.Sprintf("Hello there!\n Welcome to FamTrust. Click the link below to verify your Email Address. \n\n\n %s", verLink),
+			BodyText: fmt.Sprintf("Hello there! \nWelcome to FamTrust. \nClick the link below to verify your Email Address. \n\n\n %s", verLink),
 		}
 
 		if err = v.mailer.SendMail(&verEmail); err != nil {
@@ -103,36 +99,58 @@ func (v *VerificationHandlers) VerifyEmail(c *gin.Context) {
 			return
 		}
 
-		// If user isn't verified and token was passed in
-	} else if !user.IsVerified && verCode != "" {
-		codeID, err := uuid.Parse(verCode)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, loginResponse{
-				StatusCode: http.StatusBadRequest,
-				Status:     "error",
-				Message:    "Invalid verification code",
-			})
-			return
-		}
+	}
+}
 
-		code, err := v.models.VerCodes().GetCodeByID(codeID)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, loginResponse{
-				StatusCode: http.StatusBadRequest,
-				Status:     "error",
-				Message:    "Invalid verification code",
-			})
-			return
-		}
+// @Summary		Verify User Email Address via Token
+// @Description	Verify User Email Address via Token
+// @Tags			Verifications
+// @ID				verify-email-code
+// @Produce		json
+// @Failure		400
+// @Failure		500
+// @Success		200
+// @Param code query string true "Email verification Token"
+// @Router			/verify-email/verify [get]
+func (v *VerificationHandlers) VerifyEmailToken(c *gin.Context) {
+	verCode := c.Query("code")
 
-		if err = v.models.Users().SetIsVerified(code.UserID, true); err != nil {
-			c.JSON(http.StatusInternalServerError, loginResponse{
-				StatusCode: http.StatusInternalServerError,
-				Status:     "error",
-				Message:    "Failed to update user status to verified",
-			})
-			return
-		}
+	if verCode == "" {
+		c.JSON(http.StatusBadRequest, loginResponse{
+			StatusCode: http.StatusBadRequest,
+			Status:     "error",
+			Message:    "Invalid verification code",
+		})
+		return
+	}
+
+	codeID, err := uuid.Parse(verCode)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, loginResponse{
+			StatusCode: http.StatusBadRequest,
+			Status:     "error",
+			Message:    "Invalid verification code",
+		})
+		return
+	}
+
+	code, err := v.models.VerCodes().GetCodeByID(codeID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, loginResponse{
+			StatusCode: http.StatusBadRequest,
+			Status:     "error",
+			Message:    "Invalid verification code",
+		})
+		return
+	}
+
+	if err = v.models.Users().SetIsVerified(code.UserID, true); err != nil {
+		c.JSON(http.StatusInternalServerError, loginResponse{
+			StatusCode: http.StatusInternalServerError,
+			Status:     "error",
+			Message:    "Failed to update user status to verified",
+		})
+		return
 	}
 
 	c.JSON(http.StatusOK, loginResponse{
@@ -140,8 +158,6 @@ func (v *VerificationHandlers) VerifyEmail(c *gin.Context) {
 		Status:     "success",
 		Message:    "Email successfully verified",
 	})
-	return
-
 }
 
 // @Summary		Verify User Signup NIN

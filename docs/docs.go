@@ -184,21 +184,46 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Verify User Email Address",
+                "description": "Send User-Email Verification Email",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Verifications"
                 ],
-                "summary": "Verify User Email Address",
-                "operationId": "verify-email",
+                "summary": "Send User-Email Verification Email",
+                "operationId": "send-verify-email",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/verify-email/verify": {
+            "get": {
+                "description": "Verify User Email Address via Token",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Verifications"
+                ],
+                "summary": "Verify User Email Address via Token",
+                "operationId": "verify-email-code",
                 "parameters": [
                     {
                         "type": "string",
                         "description": "Email verification Token",
                         "name": "code",
-                        "in": "query"
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {

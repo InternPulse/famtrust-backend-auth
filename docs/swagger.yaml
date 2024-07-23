@@ -270,13 +270,8 @@ paths:
       - Verifications
   /verify-email:
     get:
-      description: Verify User Email Address
-      operationId: verify-email
-      parameters:
-      - description: Email verification Token
-        in: query
-        name: code
-        type: string
+      description: Send User-Email Verification Email
+      operationId: send-verify-email
       produces:
       - application/json
       responses:
@@ -288,7 +283,29 @@ paths:
           description: Internal Server Error
       security:
       - BearerAuth: []
-      summary: Verify User Email Address
+      summary: Send User-Email Verification Email
+      tags:
+      - Verifications
+  /verify-email/verify:
+    get:
+      description: Verify User Email Address via Token
+      operationId: verify-email-code
+      parameters:
+      - description: Email verification Token
+        in: query
+        name: code
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      summary: Verify User Email Address via Token
       tags:
       - Verifications
   /verify-nin:

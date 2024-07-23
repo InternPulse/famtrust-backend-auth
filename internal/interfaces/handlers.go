@@ -18,6 +18,7 @@ type UserHandlers interface {
 
 type VerificationHandlers interface {
 	VerifyEmail(c *gin.Context)
+	VerifyEmailToken(c *gin.Context)
 	// Verify2FA(c *gin.Context)
 	VerifyNIN(c *gin.Context)
 	VerifyBVN(c *gin.Context)

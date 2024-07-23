@@ -34,6 +34,7 @@ func (app *Config) routes() *gin.Engine {
 	// // Verification Routes
 	v1.GET("/verify-nin", app.Handlers.Verifications().VerifyNIN)
 	v1.GET("/verify-bvn", app.Handlers.Verifications().VerifyBVN)
+	v1.GET("/verify-email/verify", app.Handlers.Verifications().VerifyEmailToken)
 	// v1.GET("/reset-password", app.Handlers.Users().ResetPassword)
 
 	// Protected Routes
