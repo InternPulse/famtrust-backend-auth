@@ -16,6 +16,7 @@ services:
       - "5432:5432"
     env_file:
       - postgres.env
+      - smtp.env
     volumes:
       - ./scripts/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
       - ./data/postgres:/var/lib/postgres
