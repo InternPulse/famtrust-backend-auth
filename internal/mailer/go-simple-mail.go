@@ -34,10 +34,10 @@ func (m *Mailer) SendMail(email *interfaces.EmailMsg) error {
 func newSMTPServer() *mail.SMTPServer {
 	mailer := mail.NewSMTPClient()
 
-	// Get smtp details from envw
+	// Get smtp details from env
 	host := os.Getenv("SMTP_SERVER")
 	portStr := os.Getenv("SMTP_PORT")
-	port, err := strconv.Atoi(portStr)
+	port, err := strconv.ParseInt(portStr, 10, 64)
 	if err != nil {
 		log.Panicf("Env parse error: %v", err)
 	}
@@ -45,7 +45,7 @@ func newSMTPServer() *mail.SMTPServer {
 	password := os.Getenv("SMTP_PASSWORD")
 
 	mailer.Host = host
-	mailer.Port = port
+	mailer.Port = int(port)
 	mailer.Username = username
 	mailer.Password = password
 
