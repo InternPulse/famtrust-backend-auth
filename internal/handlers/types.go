@@ -13,7 +13,7 @@ type loginRequest struct {
 
 type loginResponse struct {
 	StatusCode uint                     `json:"statusCode"`
-	Status     string                   `json:status"`
+	Status     string                   `json:"status"`
 	Message    string                   `json:"message"`
 	Token      string                   `json:"token,omitempty"`
 	Data       map[string]loginUserData `json:"data,omitempty"`

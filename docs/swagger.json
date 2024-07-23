@@ -136,6 +136,109 @@
                     }
                 }
             }
+        },
+        "/verify-bvn": {
+            "get": {
+                "description": "Verify User Signup BVN",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Verifications"
+                ],
+                "summary": "Verify User Signup BVN",
+                "operationId": "verify-bvn",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "BVN",
+                        "name": "bvn",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/verify-email": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Verify User Email Address",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Verifications"
+                ],
+                "summary": "Verify User Email Address",
+                "operationId": "verify-email",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Email verification Token",
+                        "name": "code",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/verify-nin": {
+            "get": {
+                "description": "Verify User Signup NIN",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Verifications"
+                ],
+                "summary": "Verify User Signup NIN",
+                "operationId": "verify-nin",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "NIN",
+                        "name": "nin",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
         }
     },
     "definitions": {
