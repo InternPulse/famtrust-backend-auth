@@ -238,7 +238,7 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Group ID to filter Users By",
                         "name": "groupID",
-                        "in": "formData",
+                        "in": "query",
                         "required": true
                     }
                 ],

@@ -304,7 +304,7 @@ paths:
       operationId: users-by-groupID
       parameters:
       - description: Group ID to filter Users By
-        in: formData
+        in: query
         name: groupID
         required: true
         type: string
