@@ -23,7 +23,7 @@ type Config struct {
 
 // @title						FamTrust API Backend - Auth
 // @version					1.0
-// @description				This is the Authentication and Authrization micro-service for the FamTrust Web App.
+// @description				This is the Authentication and Authorization Micro-service for the FamTrust Web App.
 // @BasePath					/api/v1/
 // @securityDefinitions.apiKey	BearerAuth
 // @name						Authorization
