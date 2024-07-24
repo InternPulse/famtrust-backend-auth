@@ -18,6 +18,7 @@ type UserHandlers interface {
 	// User Profiles
 	GetUserProfileByID(c *gin.Context)
 	CreateUserProfile(c *gin.Context)
+	UpdateUserProfile(c *gin.Context)
 	GetProfilePicture(c *gin.Context)
 
 	// Get Users By...

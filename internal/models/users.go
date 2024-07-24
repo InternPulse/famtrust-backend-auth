@@ -72,6 +72,13 @@ func (u *UserModels) CreateUserProfile(profile *interfaces.UserProfile) error {
 	return nil
 }
 
+func (u *UserModels) UpdateUserProfile(profile *interfaces.UserProfile) error {
+	if err := u.DB.Model(&interfaces.UserProfile{}).Where("user_id = ?", profile.UserID).Updates(&profile).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
 func (u *UserModels) GetUserProfileByID(userID uuid.UUID) (*interfaces.UserProfile, error) {
 	var profile interfaces.UserProfile
 	if err := u.DB.Where("user_id = ?", userID).First(&profile).Error; err != nil {

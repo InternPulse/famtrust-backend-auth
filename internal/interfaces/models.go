@@ -19,6 +19,7 @@ type UserModels interface {
 	GetUserByID(userID uuid.UUID) (*User, error)
 	GetUserByEmail(email string) (*User, error)
 	CreateUserProfile(profile *UserProfile) error
+	UpdateUserProfile(profile *UserProfile) error
 	GetUserProfileByID(userID uuid.UUID) (*UserProfile, error)
 	UpdateUser(user *User) error
 	DeleteUserByID(userID uuid.UUID) error

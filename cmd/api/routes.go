@@ -51,7 +51,10 @@ func (app *Config) routes() *gin.Engine {
 	profile := v1.Group("/profile").Use(app.Handlers.AuthMiddleware())
 	profile.GET("/", app.Handlers.Users().GetUserProfileByID)
 	profile.POST("/create", app.Handlers.Users().CreateUserProfile)
-	// profile.PUT("/update", app.Handlers.Users().UpdateUserProfile)
+	profile.PUT("/update", app.Handlers.Users().UpdateUserProfile)
+
+	// Set a lower memory limit for multipart forms (default is 32 MiB)
+	mux.MaxMultipartMemory = 16 << 20 // 16 MiB
 
 	return mux
 

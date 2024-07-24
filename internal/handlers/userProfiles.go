@@ -163,6 +163,16 @@ func (uh *UserHandlers) CreateUserProfile(c *gin.Context) {
 			return
 		}
 
+		const maxUploadSize = 16 << 20
+		if profilePicture.Size > maxUploadSize {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"statusCode": http.StatusBadRequest,
+				"status":     "error",
+				"message":    "Picture file is too large",
+			})
+			return
+		}
+
 		// Generate a unique filename
 		filename := filepath.Base(profilePicture.Filename)
 		dst := filepath.Join("images", "profilePics", filename)
@@ -233,8 +243,8 @@ func (uh *UserHandlers) CreateUserProfile(c *gin.Context) {
 // @Param			bvn				formData	int		false	"User's Bank Verification Number"
 // @Param			defaultGroupID	formData	string	false	"User's default group ID"
 // @Param			profilePicture	formData	file	false	"User's profile picture"
-// @Router			/profile/update [post]
-func (uh *UserHandlers) CreateUserProfile(c *gin.Context) {
+// @Router			/profile/update [put]
+func (uh *UserHandlers) UpdateUserProfile(c *gin.Context) {
 
 	var profile interfaces.UserProfile
 
@@ -260,13 +270,16 @@ func (uh *UserHandlers) CreateUserProfile(c *gin.Context) {
 		bvnStr := c.PostForm("bvn")
 		defaultGroupIDStr := c.PostForm("defaultGroupID")
 
-		if firstName == "" || lastName == "" || bio == "" || defaultGroupIDStr == "" {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"statusCode": http.StatusBadRequest,
-				"status":     "error",
-				"message":    "Incomplete required signup Info",
-			})
-			return
+		if firstName != "" {
+			profile.FirstName = firstName
+		}
+
+		if lastName != "" {
+			profile.LastName = lastName
+		}
+
+		if bio != "" {
+			profile.Bio = bio
 		}
 
 		// Parse NIN
@@ -296,44 +309,65 @@ func (uh *UserHandlers) CreateUserProfile(c *gin.Context) {
 		}
 
 		// Parse defaultGroupID
-		defaultGroupID, err := uuid.Parse(defaultGroupIDStr)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"status":  "error",
-				"message": "Invalid value for defaultGroupID",
-			})
-			return
+		if defaultGroupIDStr != "" {
+			defaultGroupID, err := uuid.Parse(defaultGroupIDStr)
+			if err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{
+					"status":  "error",
+					"message": "Invalid value for defaultGroupID",
+				})
+				return
+			}
+			profile.DefaultGroup = defaultGroupID
 		}
 
-		// Get profile picture
-		profilePicture, err := c.FormFile("profilePicture")
-		if err != nil {
+		// Check if a profile picture was submitted
+		if fileHeader, err := c.FormFile("profilePicture"); err == nil && fileHeader != nil {
+			// A file was submitted, process it
+			profilePicture, err := c.FormFile("profilePicture")
+			if err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{
+					"statusCode": http.StatusBadRequest,
+					"status":     "error",
+					"message":    "Error parsing profile picture. Check your upload",
+				})
+				return
+			}
+
+			const maxUploadSize = 16 << 20
+			if profilePicture.Size > maxUploadSize {
+				c.JSON(http.StatusBadRequest, gin.H{
+					"statusCode": http.StatusBadRequest,
+					"status":     "error",
+					"message":    "Picture file is too large",
+				})
+				return
+			}
+
+			// Generate a unique filename
+			filename := filepath.Base(profilePicture.Filename)
+			dst := filepath.Join("images", "profilePics", filename)
+			dstURL := filepath.Join("images", "profile-pic", filename)
+
+			// Save the file
+			if err := c.SaveUploadedFile(profilePicture, dst); err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
+			}
+
+			profile.ProfilePictureUrl = dstURL
+
+		} else if err != http.ErrMissingFile {
+			// An error occurred while checking for the file (other than the file being missing)
 			c.JSON(http.StatusBadRequest, gin.H{
 				"statusCode": http.StatusBadRequest,
 				"status":     "error",
-				"message":    "Error parsing profile picture. Check your upload",
+				"message":    "Error parsing image. Check your upload",
 			})
 			return
 		}
 
-		// Generate a unique filename
-		filename := filepath.Base(profilePicture.Filename)
-		dst := filepath.Join("images", "profilePics", filename)
-		dstURL := filepath.Join("images", "profile-pic", filename)
-
-		// Save the file
-		if err := c.SaveUploadedFile(profilePicture, dst); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
-
-		// User values
 		profile.UserID = UserID.(uuid.UUID)
-		profile.FirstName = firstName
-		profile.LastName = lastName
-		profile.Bio = bio
-		profile.DefaultGroup = defaultGroupID
-		profile.ProfilePictureUrl = dstURL
 
 	default:
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -347,20 +381,12 @@ func (uh *UserHandlers) CreateUserProfile(c *gin.Context) {
 		return
 	}
 
-	err := uh.models.Users().CreateUserProfile(&profile)
+	err := uh.models.Users().UpdateUserProfile(&profile)
 	if err != nil {
-		if strings.Contains(err.Error(), "duplicate key value") {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"statusCode": http.StatusBadRequest,
-				"status":     "error",
-				"message":    "User already has a profile",
-			})
-			return
-		}
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"statusCode": http.StatusInternalServerError,
 			"status":     "error",
-			"message":    "An error occured, failed to create user profile",
+			"message":    "An error occured, failed to update user profile",
 		})
 		return
 	}
@@ -368,7 +394,7 @@ func (uh *UserHandlers) CreateUserProfile(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{
 		"statusCode": http.StatusCreated,
 		"status":     "success",
-		"message":    "User profile created successfully",
+		"message":    "User profile updated successfully",
 	})
 }
 

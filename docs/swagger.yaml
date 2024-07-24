@@ -329,6 +329,49 @@ paths:
       summary: Create New User Profile
       tags:
       - User-Profiles
+  /profile/update:
+    put:
+      consumes:
+      - multipart/form-data
+      description: Update User Profile
+      operationId: update-profile
+      parameters:
+      - description: User's first name
+        in: formData
+        name: firstName
+        type: string
+      - description: User's last name
+        in: formData
+        name: lastName
+        type: string
+      - description: User's biography
+        in: formData
+        name: bio
+        type: string
+      - description: User's National Identification Number
+        in: formData
+        name: nin
+        type: integer
+      - description: User's Bank Verification Number
+        in: formData
+        name: bvn
+        type: integer
+      - description: User's default group ID
+        in: formData
+        name: defaultGroupID
+        type: string
+      - description: User's profile picture
+        in: formData
+        name: profilePicture
+        type: file
+      produces:
+      - application/json
+      responses: {}
+      security:
+      - BearerAuth: []
+      summary: Update User Profile
+      tags:
+      - User-Profiles
   /signup:
     post:
       consumes:

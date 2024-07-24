@@ -268,6 +268,72 @@ const docTemplate = `{
                 "responses": {}
             }
         },
+        "/profile/update": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Update User Profile",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User-Profiles"
+                ],
+                "summary": "Update User Profile",
+                "operationId": "update-profile",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User's first name",
+                        "name": "firstName",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "User's last name",
+                        "name": "lastName",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "User's biography",
+                        "name": "bio",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "User's National Identification Number",
+                        "name": "nin",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "User's Bank Verification Number",
+                        "name": "bvn",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "User's default group ID",
+                        "name": "defaultGroupID",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "file",
+                        "description": "User's profile picture",
+                        "name": "profilePicture",
+                        "in": "formData"
+                    }
+                ],
+                "responses": {}
+            }
+        },
         "/signup": {
             "post": {
                 "description": "Create an Admin/Main User Account",
