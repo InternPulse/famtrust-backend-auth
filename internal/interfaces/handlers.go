@@ -10,6 +10,7 @@ type Handlers interface {
 
 type UserHandlers interface {
 	Signup(c *gin.Context)
+	CreateUser(c *gin.Context)
 	Login(c *gin.Context)
 	Validate(c *gin.Context)
 	GetUserProfileByID(c *gin.Context)

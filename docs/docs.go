@@ -15,6 +15,64 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/create-user": {
+            "post": {
+                "description": "Create a Sub-User/Member User Account",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User-Accounts"
+                ],
+                "summary": "Create a Sub-User/Member User Account",
+                "operationId": "create-user",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Email of the new user",
+                        "name": "email",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Password of the new user",
+                        "name": "password",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Optional Role ID string for new user. Defaults to 'member' if not specified",
+                        "name": "roleID",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Optional true or false value to set new user 2FA preference",
+                        "name": "has2FA",
+                        "in": "formData"
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.loginSampleResponseError500"
+                        }
+                    }
+                }
+            }
+        },
         "/login": {
             "post": {
                 "description": "Login to FamTrust (Supports 2FA by Email)",
@@ -99,6 +157,58 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/handlers.loginSampleResponseError401"
                         }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.loginSampleResponseError500"
+                        }
+                    }
+                }
+            }
+        },
+        "/signup": {
+            "post": {
+                "description": "Create an Admin/Main User Account",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User-Accounts"
+                ],
+                "summary": "Create an Admin/Main User Account",
+                "operationId": "signup",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Email of the new user",
+                        "name": "email",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Password of the new user",
+                        "name": "password",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Optional true or false value to set new user 2FA preference",
+                        "name": "has2FA",
+                        "in": "formData"
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    },
+                    "400": {
+                        "description": "Bad Request"
                     },
                     "500": {
                         "description": "Internal Server Error",
@@ -353,59 +463,54 @@ const docTemplate = `{
         "handlers.profileSampleResponse200": {
             "type": "object",
             "properties": {
-                "data": {
-                    "type": "object",
-                    "properties": {
-                        "profile": {
-                            "type": "object",
-                            "properties": {
-                                "bio": {
-                                    "type": "string",
-                                    "example": "The best FamTrust user of all time."
-                                },
-                                "bvn": {
-                                    "type": "integer",
-                                    "example": 35473783473
-                                },
-                                "createdAt": {
-                                    "type": "string",
-                                    "example": "2024-07-22T14:30:00Z"
-                                },
-                                "firstName": {
-                                    "type": "string",
-                                    "example": "Famtrust"
-                                },
-                                "id": {
-                                    "type": "string",
-                                    "example": "a5c9f82e-6b7a-4a53-a81c-82b1e2f453a6"
-                                },
-                                "lastName": {
-                                    "type": "string",
-                                    "example": "Guru"
-                                },
-                                "nin": {
-                                    "type": "integer",
-                                    "example": 35473745433
-                                },
-                                "profile_picture_url": {
-                                    "type": "string",
-                                    "example": "https://image.famtrust.biz/dkkjieikdjfoej.jpg"
-                                },
-                                "updatedAt": {
-                                    "type": "string",
-                                    "example": "2024-07-22T14:30:00Z"
-                                },
-                                "userID": {
-                                    "type": "string",
-                                    "example": "d38f91b2-dc3b-4f9d-aeb4-7b95c91e9d08"
-                                }
-                            }
-                        }
-                    }
-                },
                 "message": {
                     "type": "string",
                     "example": "Request successful"
+                },
+                "profile": {
+                    "type": "object",
+                    "properties": {
+                        "bio": {
+                            "type": "string",
+                            "example": "The best FamTrust user of all time."
+                        },
+                        "bvn": {
+                            "type": "integer",
+                            "example": 35473783473
+                        },
+                        "createdAt": {
+                            "type": "string",
+                            "example": "2024-07-22T14:30:00Z"
+                        },
+                        "firstName": {
+                            "type": "string",
+                            "example": "Famtrust"
+                        },
+                        "id": {
+                            "type": "string",
+                            "example": "a5c9f82e-6b7a-4a53-a81c-82b1e2f453a6"
+                        },
+                        "lastName": {
+                            "type": "string",
+                            "example": "Guru"
+                        },
+                        "nin": {
+                            "type": "integer",
+                            "example": 35473745433
+                        },
+                        "profilePictureUrl": {
+                            "type": "string",
+                            "example": "https://image.famtrust.biz/dkkjieikdjfoej.jpg"
+                        },
+                        "updatedAt": {
+                            "type": "string",
+                            "example": "2024-07-22T14:30:00Z"
+                        },
+                        "userID": {
+                            "type": "string",
+                            "example": "d38f91b2-dc3b-4f9d-aeb4-7b95c91e9d08"
+                        }
+                    }
                 },
                 "status": {
                     "type": "string",

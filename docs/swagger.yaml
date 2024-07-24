@@ -51,45 +51,42 @@ definitions:
     type: object
   handlers.profileSampleResponse200:
     properties:
-      data:
-        properties:
-          profile:
-            properties:
-              bio:
-                example: The best FamTrust user of all time.
-                type: string
-              bvn:
-                example: 35473783473
-                type: integer
-              createdAt:
-                example: "2024-07-22T14:30:00Z"
-                type: string
-              firstName:
-                example: Famtrust
-                type: string
-              id:
-                example: a5c9f82e-6b7a-4a53-a81c-82b1e2f453a6
-                type: string
-              lastName:
-                example: Guru
-                type: string
-              nin:
-                example: 35473745433
-                type: integer
-              profile_picture_url:
-                example: https://image.famtrust.biz/dkkjieikdjfoej.jpg
-                type: string
-              updatedAt:
-                example: "2024-07-22T14:30:00Z"
-                type: string
-              userID:
-                example: d38f91b2-dc3b-4f9d-aeb4-7b95c91e9d08
-                type: string
-            type: object
-        type: object
       message:
         example: Request successful
         type: string
+      profile:
+        properties:
+          bio:
+            example: The best FamTrust user of all time.
+            type: string
+          bvn:
+            example: 35473783473
+            type: integer
+          createdAt:
+            example: "2024-07-22T14:30:00Z"
+            type: string
+          firstName:
+            example: Famtrust
+            type: string
+          id:
+            example: a5c9f82e-6b7a-4a53-a81c-82b1e2f453a6
+            type: string
+          lastName:
+            example: Guru
+            type: string
+          nin:
+            example: 35473745433
+            type: integer
+          profilePictureUrl:
+            example: https://image.famtrust.biz/dkkjieikdjfoej.jpg
+            type: string
+          updatedAt:
+            example: "2024-07-22T14:30:00Z"
+            type: string
+          userID:
+            example: d38f91b2-dc3b-4f9d-aeb4-7b95c91e9d08
+            type: string
+        type: object
       status:
         example: success
         type: string
@@ -163,6 +160,46 @@ info:
   title: FamTrust API Backend - Auth
   version: "1.0"
 paths:
+  /create-user:
+    post:
+      consumes:
+      - application/json
+      description: Create a Sub-User/Member User Account
+      operationId: create-user
+      parameters:
+      - description: Email of the new user
+        in: formData
+        name: email
+        required: true
+        type: string
+      - description: Password of the new user
+        in: formData
+        name: password
+        required: true
+        type: string
+      - description: Optional Role ID string for new user. Defaults to 'member' if
+          not specified
+        in: formData
+        name: roleID
+        type: string
+      - description: Optional true or false value to set new user 2FA preference
+        in: formData
+        name: has2FA
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.loginSampleResponseError500'
+      summary: Create a Sub-User/Member User Account
+      tags:
+      - User-Accounts
   /login:
     post:
       consumes:
@@ -224,6 +261,41 @@ paths:
       summary: Retrieve User Profile Details
       tags:
       - User-Profiles
+  /signup:
+    post:
+      consumes:
+      - application/json
+      description: Create an Admin/Main User Account
+      operationId: signup
+      parameters:
+      - description: Email of the new user
+        in: formData
+        name: email
+        required: true
+        type: string
+      - description: Password of the new user
+        in: formData
+        name: password
+        required: true
+        type: string
+      - description: Optional true or false value to set new user 2FA preference
+        in: formData
+        name: has2FA
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.loginSampleResponseError500'
+      summary: Create an Admin/Main User Account
+      tags:
+      - User-Accounts
   /validate:
     get:
       consumes:

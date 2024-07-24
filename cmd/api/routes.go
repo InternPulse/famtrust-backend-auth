@@ -25,27 +25,27 @@ func (app *Config) routes() *gin.Engine {
 	// Make API v1
 	v1 := api.Group("/v1")
 
-	// Auth Routes
-	// signup
-	// v1.GET("/signup", app.Handlers.Users().Signup)
+	// User Routes
+	v1.POST("/signup", app.Handlers.Users().Signup)
 	v1.POST("/login", app.Handlers.Users().Login)
+	v1.POST("/create-user", app.Handlers.Users().CreateUser)
+	// v1.POST("/delete-user", app.Handlers.Users().DeleteUser)
+	// v1.GET("/reset-password", app.Handlers.Users().ResetPassword)
 
 	// // Verification Routes
 	v1.GET("/verify-nin", app.Handlers.Verifications().VerifyNIN)
 	v1.GET("/verify-bvn", app.Handlers.Verifications().VerifyBVN)
 	v1.GET("/verify-email/verify", app.Handlers.Verifications().VerifyEmailToken)
-	// v1.GET("/reset-password", app.Handlers.Users().ResetPassword)
 
 	// Protected Routes
-	// validate token
 	v1.GET("/validate", app.Handlers.AuthMiddleware(), app.Handlers.Users().Validate)
 	v1.GET("/verify-email", app.Handlers.AuthMiddleware(), app.Handlers.Verifications().VerifyEmail)
 
-	// // User & UserProfile Routes
-	v1.GET("/profile", app.Handlers.AuthMiddleware(), app.Handlers.Users().GetUserProfileByID)
-	// v1.POST("/profile/create", app.Handlers.Users().CreateUser)
-	// v1.PUT("/profile/update", app.Handlers.Users().UpdateUserByID)
-	// v1.DELETE("/profile/delete", app.Handlers.Users().DeleteUserByID)
+	// // UserProfile Routes [Protected]
+	profile := v1.Group("/profile").Use(app.Handlers.AuthMiddleware())
+	profile.GET("/", app.Handlers.Users().GetUserProfileByID)
+	// profile.POST("/create", app.Handlers.Users().CreateUserProfile)
+	// profile.PUT("/update", app.Handlers.Users().UpdateUserProfile)
 
 	return mux
 

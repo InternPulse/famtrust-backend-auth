@@ -53,9 +53,9 @@ type VerCodeModels interface {
 
 // Create uuid model.
 type UUIDModel struct {
-	ID        uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primaryKey"`
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	ID        uuid.UUID      `json:"id" gorm:"type:uuid;default:uuid_generate_v4();primaryKey"`
+	CreatedAt time.Time      `json:"createdAt"`
+	UpdatedAt time.Time      `json:"updatedAt"`
 	DeletedAt gorm.DeletedAt `gorm:"index"`
 }
 
@@ -75,7 +75,6 @@ type User struct {
 	Has2FA       bool        `gorm:"column:has_2fa;not null"`
 	IsVerified   bool        `gorm:"not null"`
 	IsFreezed    bool        `gorm:"not null"`
-	DefaultGroup uuid.UUID   `gorm:"not null"`
 	LastLogin    time.Time   `gorm:"not null"`
 	Role         Role        `gorm:"foreignKey:RoleID;references:ID"`
 	UserProfile  UserProfile `gorm:"foreignKey:UserID;references:ID;constraints:OnUpdate:CASCADE,OnDelete:CASCADE"`
@@ -83,25 +82,26 @@ type User struct {
 
 type UserProfile struct {
 	UUIDModel
-	UserID              uuid.UUID
-	FirstName           string `gorm:"not null"`
-	LastName            string `gorm:"not null"`
-	Bio                 string `gorm:"not null"`
-	NIN                 uint   `gorm:"unique"`
-	BVN                 uint   `gorm:"unique"`
-	Profile_picture_url string `gorm:"not null"`
+	UserID            uuid.UUID `json:"userId"`
+	FirstName         string    `json:"firstName" gorm:"not null"`
+	LastName          string    `json:"lastName" gorm:"not null"`
+	Bio               string    `json:"bio" gorm:"not null"`
+	DefaultGroup      uuid.UUID `json:"defaultGroup"`
+	NIN               uint      `json:"nin" gorm:"unique"`
+	BVN               uint      `json:"bvn" gorm:"unique"`
+	ProfilePictureUrl string    `json:"profilePictureUrl" gorm:"not null"`
 }
 
 type Role struct {
-	ID          string `gorm:"primaryKey"`
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
+	ID          string         `json:"Id" gorm:"primaryKey"`
+	CreatedAt   time.Time      `json:"createdAt"`
+	UpdatedAt   time.Time      `json:"updatedAt"`
 	DeletedAt   gorm.DeletedAt `gorm:"index"`
-	Permissions []Permission   `gorm:"many2many:role_permissions;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	Permissions []Permission   `json:"permissions" gorm:"many2many:role_permissions;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 }
 
 type Permission struct {
-	ID        string `gorm:"primaryKey"`
+	ID        string `json:"Id" gorm:"primaryKey"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	DeletedAt gorm.DeletedAt `gorm:"index"`
@@ -112,6 +112,6 @@ type Permission struct {
 // TODO: Implement enums
 type VerCode struct {
 	UUIDModel
-	UserID uuid.UUID `gorm:"not null"`
-	Type   string    `gorm:"not null"`
+	UserID uuid.UUID `json:"userId" gorm:"not null"`
+	Type   string    `json:"type" gorm:"not null"`
 }

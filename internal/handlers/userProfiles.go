@@ -55,9 +55,7 @@ func (uh *UserHandlers) GetUserProfileByID(c *gin.Context) {
 		"statusCode": http.StatusOK,
 		"status":     "success",
 		"message":    "User profile retrieved successfully",
-		"data": gin.H{
-			"profile": profile,
-		},
+		"profile":    profile,
 	}
 
 	c.JSON(http.StatusOK, payload)

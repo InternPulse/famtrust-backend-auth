@@ -4,11 +4,15 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
+	"strings"
+	"time"
 
 	"github.com/InternPulse/famtrust-backend-auth/internal/interfaces"
 	"github.com/InternPulse/famtrust-backend-auth/internal/jwtmod"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type UserHandlers struct {
@@ -240,13 +244,248 @@ func (uh *UserHandlers) Validate(c *gin.Context) {
 		Status:     "success",
 		Message:    "User session is valid",
 		Token:      token.(string),
-		Data: map[string]loginUserData{
-			"user": userPayload,
-		},
+		User:       userPayload,
 	}
 
 	c.JSON(http.StatusOK, payload)
 }
 
+// @Summary		Create an Admin/Main User Account
+// @Description	Create an Admin/Main User Account
+// @Tags			User-Accounts
+// @ID				signup
+// @Accept			json
+// @Produce		json
+// @Failure		400
+// @Failure		500	{object}	loginSampleResponseError500
+// @Success		201
+// @Param email formData string true "Email of the new user"
+// @Param password formData string true "Password of the new user"
+// @Param has2FA formData string false "Optional true or false value to set new user 2FA preference"
+// @Router			/signup [post]
 func (uh *UserHandlers) Signup(c *gin.Context) {
+	var user interfaces.User
+
+	switch {
+
+	case strings.Contains(c.GetHeader("Content-Type"), "application/x-www-form-urlencoded"):
+	case strings.Contains(c.GetHeader("Content-Type"), "multipart/form-data"):
+		form, err := c.MultipartForm()
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"statusCode": http.StatusBadRequest,
+				"status":     "error",
+				"message":    "Failed to parse form",
+			})
+			return
+		}
+
+		email := form.Value["email"][0]
+		password := form.Value["password"][0]
+		has2FAStr := form.Value["has2FA"][0]
+
+		// image := form.File["image"][0]
+		// if image != nil {
+		// 	c.SaveUploadedFile(image, fmt.Sprintf("%s/%s", uploadDir, image.Filename))
+		// }
+
+		// price, err := strconv.ParseFloat(priceStr[0], 64)
+		// if err != nil {
+		// 	c.JSON(http.StatusBadRequest, gin.H{
+		// 		"status":  "error",
+		// 		"message": "Invalid price, price must be a number",
+		// 	})
+		// 	return
+		// }
+
+		if email == "" || password == "" {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"statusCode": http.StatusBadRequest,
+				"status":     "error",
+				"message":    "Incomplete signup Info",
+			})
+			return
+		}
+
+		if has2FAStr != "" {
+			has2FA, err := strconv.ParseBool(has2FAStr)
+			if err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{
+					"status":  "error",
+					"message": "2FA value must be either true or false",
+				})
+				return
+			}
+
+			user.Has2FA = has2FA
+		}
+
+		// Generate user password
+		bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"statusCode": http.StatusInternalServerError,
+				"status":     "error",
+				"message":    "Error parsing user password",
+			})
+			return
+		}
+		passwordHash := string(bytes)
+
+		user = interfaces.User{
+			Email:        email,
+			PasswordHash: passwordHash,
+			RoleID:       "admin",
+			LastLogin:    time.Now(),
+		}
+
+	default:
+		c.JSON(http.StatusBadRequest, gin.H{
+			"statusCode": http.StatusBadRequest,
+			"status":     "error",
+			"message":    "Invalid signup data. Submit valid form-data",
+			"error": gin.H{
+				"error": fmt.Sprintf("You made use of a :%s: header", c.GetHeader("Content-Type")),
+			},
+		})
+		return
+	}
+
+	err := uh.models.Users().CreateUser(&user)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"statusCode": http.StatusInternalServerError,
+			"status":     "error",
+			"message":    "An error occured, failed to create User",
+		})
+		return
+	}
+
+	token, err := jwtmod.GenerateJWT(user.ID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, loginResponse{
+			StatusCode: http.StatusInternalServerError,
+			Status:     "error",
+			Message:    "Error processing user sign in",
+		})
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{
+		"statusCode": http.StatusCreated,
+		"status":     "success",
+		"message":    "User created successfully. Proceed to verify email",
+		"token":      token,
+	})
+}
+
+// @Summary		Create a Sub-User/Member User Account
+// @Description	Create a Sub-User/Member User Account
+// @Tags			User-Accounts
+// @ID				create-user
+// @Accept			json
+// @Produce		json
+// @Failure		400
+// @Failure		500	{object}	loginSampleResponseError500
+// @Success		201
+// @Param email formData string true "Email of the new user"
+// @Param password formData string true "Password of the new user"
+// @Param roleID formData string false "Optional Role ID string for new user. Defaults to 'member' if not specified"
+// @Param has2FA formData string false "Optional true or false value to set new user 2FA preference"
+// @Router			/create-user [post]
+func (uh *UserHandlers) CreateUser(c *gin.Context) {
+	var user interfaces.User
+
+	switch {
+
+	case strings.Contains(c.GetHeader("Content-Type"), "application/x-www-form-urlencoded"):
+	case strings.Contains(c.GetHeader("Content-Type"), "multipart/form-data"):
+		form, err := c.MultipartForm()
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"statusCode": http.StatusBadRequest,
+				"status":     "error",
+				"message":    "Failed to parse form",
+			})
+			return
+		}
+
+		email := form.Value["email"][0]
+		password := form.Value["password"][0]
+		has2FAStr := form.Value["has2FA"][0]
+		roleID := form.Value["roleID"][0]
+
+		if email == "" || password == "" {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"statusCode": http.StatusBadRequest,
+				"status":     "error",
+				"message":    "Incomplete signup Info",
+			})
+			return
+		}
+
+		if has2FAStr != "" {
+			has2FA, err := strconv.ParseBool(has2FAStr)
+			if err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{
+					"status":  "error",
+					"message": "2FA value must be either true or false",
+				})
+				return
+			}
+
+			user.Has2FA = has2FA
+		}
+
+		if roleID != "" {
+			user.RoleID = roleID
+		} else {
+			user.RoleID = "member"
+		}
+
+		// Generate user password
+		bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"statusCode": http.StatusInternalServerError,
+				"status":     "error",
+				"message":    "Error parsing user password",
+			})
+			return
+		}
+		passwordHash := string(bytes)
+
+		user = interfaces.User{
+			Email:        email,
+			PasswordHash: passwordHash,
+			LastLogin:    time.Now(),
+		}
+
+	default:
+		c.JSON(http.StatusBadRequest, gin.H{
+			"statusCode": http.StatusBadRequest,
+			"status":     "error",
+			"message":    "Invalid signup data. Submit valid form-data",
+			"error": gin.H{
+				"error": fmt.Sprintf("You made use of a :%s: header", c.GetHeader("Content-Type")),
+			},
+		})
+		return
+	}
+
+	err := uh.models.Users().CreateUser(&user)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"statusCode": http.StatusInternalServerError,
+			"status":     "error",
+			"message":    "An error occured, failed to create User",
+		})
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{
+		"statusCode": http.StatusCreated,
+		"status":     "success",
+		"message":    "User created successfully. User can sign in now",
+	})
 }

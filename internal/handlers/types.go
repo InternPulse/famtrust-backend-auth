@@ -12,11 +12,11 @@ type loginRequest struct {
 }
 
 type loginResponse struct {
-	StatusCode uint                     `json:"statusCode"`
-	Status     string                   `json:"status"`
-	Message    string                   `json:"message"`
-	Token      string                   `json:"token,omitempty"`
-	Data       map[string]loginUserData `json:"data,omitempty"`
+	StatusCode uint          `json:"statusCode"`
+	Status     string        `json:"status"`
+	Message    string        `json:"message"`
+	Token      string        `json:"token,omitempty"`
+	User       loginUserData `json:"user,omitempty"`
 }
 
 type loginUserData struct {
