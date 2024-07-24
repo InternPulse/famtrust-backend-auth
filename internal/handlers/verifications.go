@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -161,12 +162,7 @@ func (v *VerificationHandlers) VerifyEmailToken(c *gin.Context) {
 	}
 
 	if err = v.models.VerCodes().DeleteEmailCodeByUserID(code.UserID); err != nil {
-		c.JSON(http.StatusInternalServerError, loginResponse{
-			StatusCode: http.StatusInternalServerError,
-			Status:     "error",
-			Message:    "An error occured",
-		})
-		return
+		log.Printf("Failed to delete Email verification code: %v", err)
 	}
 
 	c.JSON(http.StatusOK, loginResponse{

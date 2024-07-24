@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/InternPulse/famtrust-backend-auth/internal/interfaces"
@@ -60,6 +61,8 @@ func (uh *UserHandlers) Login(c *gin.Context) {
 		})
 		return
 	}
+
+	var codeStr string
 
 	if user.Has2FA {
 
@@ -126,7 +129,7 @@ func (uh *UserHandlers) Login(c *gin.Context) {
 				return
 			}
 
-			codeStr := code.ID.String()
+			codeStr = code.ID.String()
 			if (codeStr[:3] + codeStr[len(codeStr)-3:]) != twoFACode {
 				c.JSON(http.StatusUnauthorized, loginResponse{
 					StatusCode: http.StatusUnauthorized,
@@ -147,6 +150,13 @@ func (uh *UserHandlers) Login(c *gin.Context) {
 			Message:    "An error has occured",
 		})
 		return
+	}
+
+	if codeStr != "" {
+		err := uh.models.VerCodes().Delete2FACodeByUserID(user.ID)
+		if err != nil {
+			log.Printf("Unable to delete 2FA Verifcation Code: %v", err)
+		}
 	}
 
 	payload := loginResponse{
