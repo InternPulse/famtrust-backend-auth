@@ -45,10 +45,10 @@ type UserPermissions interface {
 
 type VerCodeModels interface {
 	CreateVerificationCode(verCode *VerCode) error
-	GetEmailCodeByID(codeID uuid.UUID) (*VerCode, error)
-	Get2FACodeByID(codeID uuid.UUID) (*VerCode, error)
-	DeleteEmailCodeByID(codeID uuid.UUID) error
-	Delete2FACodeByID(codeID uuid.UUID) error
+	GetEmailCodeByUserID(codeID uuid.UUID) (*VerCode, error)
+	Get2FACodeByUserID(codeID uuid.UUID) (*VerCode, error)
+	DeleteEmailCodeByUserID(codeID uuid.UUID) error
+	Delete2FACodeByUserID(codeID uuid.UUID) error
 }
 
 // Create uuid model.

@@ -10,31 +10,31 @@ type VerificationCodes struct {
 	DB *gorm.DB
 }
 
-func (v *VerificationCodes) GetEmailCodeByID(codeID uuid.UUID) (*interfaces.VerCode, error) {
+func (v *VerificationCodes) GetEmailCodeByUserID(UserID uuid.UUID) (*interfaces.VerCode, error) {
 	var profile interfaces.VerCode
-	if err := v.DB.Where("type = ?", "email").First(&profile, codeID).Error; err != nil {
+	if err := v.DB.Order("created_at DESC").Where("type = email").Where("user_id = ?", UserID).Find(&profile).Limit(1).Error; err != nil {
 		return nil, err
 	}
 	return &profile, nil
 }
 
-func (v *VerificationCodes) Get2FACodeByID(codeID uuid.UUID) (*interfaces.VerCode, error) {
+func (v *VerificationCodes) Get2FACodeByUserID(UserID uuid.UUID) (*interfaces.VerCode, error) {
 	var profile interfaces.VerCode
-	if err := v.DB.Where("type = ?", "2fa").First(&profile, codeID).Error; err != nil {
+	if err := v.DB.Order("created_at DESC").Where("type = 2fa").Where("user_id = ?", UserID).Find(&profile).Limit(1).Error; err != nil {
 		return nil, err
 	}
 	return &profile, nil
 }
 
-func (v *VerificationCodes) DeleteEmailCodeByID(codeID uuid.UUID) error {
-	if err := v.DB.Where("type = ?", "email").Delete(&interfaces.VerCode{}, codeID).Error; err != nil {
+func (v *VerificationCodes) DeleteEmailCodeByUserID(UserID uuid.UUID) error {
+	if err := v.DB.Delete(&interfaces.VerCode{}).Where("type = email").Where("user_id = ?", UserID).Error; err != nil {
 		return err
 	}
 	return nil
 }
 
-func (v *VerificationCodes) Delete2FACodeByID(codeID uuid.UUID) error {
-	if err := v.DB.Where("type = ?", "2fa").Delete(&interfaces.VerCode{}, codeID).Error; err != nil {
+func (v *VerificationCodes) Delete2FACodeByUserID(UserID uuid.UUID) error {
+	if err := v.DB.Delete(&interfaces.VerCode{}).Where("type = 2fa").Where("user_id = ?", UserID).Error; err != nil {
 		return err
 	}
 	return nil

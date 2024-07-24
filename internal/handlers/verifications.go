@@ -63,7 +63,8 @@ func (v *VerificationHandlers) VerifyEmail(c *gin.Context) {
 			Type:   "email",
 		}
 
-		// TODO: Create verification codes that expire
+		// NOTE: Created tokens are invalid once another is created
+		// Only the latest/last created token is used
 		err := v.models.VerCodes().CreateVerificationCode(&verCode)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, loginResponse{
@@ -80,10 +81,13 @@ func (v *VerificationHandlers) VerifyEmail(c *gin.Context) {
 
 		// send as email
 		verEmail := interfaces.EmailMsg{
-			Subject:  "Verify your FamTrust Email",
-			From:     "FamTrust <biz@famtrust.biz>",
-			To:       user.Email,
-			BodyText: fmt.Sprintf("Hello there! \nWelcome to FamTrust. \nClick the link below to verify your Email Address. \n\n\n %s", verLink),
+			Subject: "Verify your FamTrust Email",
+			From:    "FamTrust <biz@famtrust.biz>",
+			To:      user.Email,
+			BodyText: fmt.Sprintf("Hello there! \n"+
+				"Welcome to FamTrust. \n"+
+				"Click the link below to verify your Email Address. \n\n\n "+
+				"%s", verLink),
 		}
 
 		if err = v.mailer.SendMail(&verEmail); err != nil {
@@ -137,7 +141,7 @@ func (v *VerificationHandlers) VerifyEmailToken(c *gin.Context) {
 		return
 	}
 
-	code, err := v.models.VerCodes().GetEmailCodeByID(codeID)
+	code, err := v.models.VerCodes().GetEmailCodeByUserID(codeID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, loginResponse{
 			StatusCode: http.StatusBadRequest,
@@ -156,7 +160,7 @@ func (v *VerificationHandlers) VerifyEmailToken(c *gin.Context) {
 		return
 	}
 
-	if err = v.models.VerCodes().DeleteEmailCodeByID(code.ID); err != nil {
+	if err = v.models.VerCodes().DeleteEmailCodeByUserID(code.UserID); err != nil {
 		c.JSON(http.StatusInternalServerError, loginResponse{
 			StatusCode: http.StatusInternalServerError,
 			Status:     "error",

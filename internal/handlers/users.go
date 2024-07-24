@@ -71,7 +71,8 @@ func (uh *UserHandlers) Login(c *gin.Context) {
 				UserID: user.ID,
 				Type:   "2fa",
 			}
-			// TODO: Create verification codes that expire
+			// NOTE: Created tokens are invalid once another is created
+			// Only the latest/last created token is used
 			err := uh.models.VerCodes().CreateVerificationCode(&verCode)
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, loginResponse{
@@ -115,7 +116,7 @@ func (uh *UserHandlers) Login(c *gin.Context) {
 			}
 
 		} else {
-			code, err := uh.models.VerCodes().Get2FACodeByID(user.ID)
+			code, err := uh.models.VerCodes().Get2FACodeByUserID(user.ID)
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, loginResponse{
 					StatusCode: http.StatusInternalServerError,
@@ -130,7 +131,7 @@ func (uh *UserHandlers) Login(c *gin.Context) {
 				c.JSON(http.StatusUnauthorized, loginResponse{
 					StatusCode: http.StatusUnauthorized,
 					Status:     "error",
-					Message:    "Invalid 2FA Code",
+					Message:    "Invalid or Expired 2FA Code. Use the latest code",
 				})
 				return
 			}
