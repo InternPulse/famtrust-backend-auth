@@ -28,7 +28,6 @@ func (app *Config) routes() *gin.Engine {
 	// Auth Routes
 	// signup
 	// v1.GET("/signup", app.Handlers.Users().Signup)
-	// login
 	v1.POST("/login", app.Handlers.Users().Login)
 
 	// // Verification Routes
@@ -39,13 +38,11 @@ func (app *Config) routes() *gin.Engine {
 
 	// Protected Routes
 	// validate token
-	v1.Use(app.Handlers.AuthMiddleware()).GET("/validate", app.Handlers.Users().Validate)
-	// verify email
-	v1.Use(app.Handlers.AuthMiddleware()).GET("/verify-email", app.Handlers.Verifications().VerifyEmail)
-	// v1.GET("/verify-2fa", app.Handlers.Users().Verify2FA)
+	v1.GET("/validate", app.Handlers.AuthMiddleware(), app.Handlers.Users().Validate)
+	v1.GET("/verify-email", app.Handlers.AuthMiddleware(), app.Handlers.Verifications().VerifyEmail)
 
 	// // User & UserProfile Routes
-	v1.Use(app.Handlers.AuthMiddleware()).GET("/profile", app.Handlers.Users().GetUserProfileByID)
+	v1.GET("/profile", app.Handlers.AuthMiddleware(), app.Handlers.Users().GetUserProfileByID)
 	// v1.POST("/profile/create", app.Handlers.Users().CreateUser)
 	// v1.PUT("/profile/update", app.Handlers.Users().UpdateUserByID)
 	// v1.DELETE("/profile/delete", app.Handlers.Users().DeleteUserByID)

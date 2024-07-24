@@ -158,8 +158,8 @@ definitions:
     type: object
 info:
   contact: {}
-  description: This is the Authentication and Authrization micro-service for the FamTrust
-    Web App.
+  description: This is the Authentication and Authorization Micro-service for the
+    FamTrust Web App.
   title: FamTrust API Backend - Auth
   version: "1.0"
 paths:
@@ -167,15 +167,19 @@ paths:
     post:
       consumes:
       - application/json
-      description: Login to FamTrust
+      description: Login to FamTrust (Supports 2FA by Email)
       operationId: login
       parameters:
       - description: User Credentials
         in: body
-        name: credentials
+        name: Credentials
         required: true
         schema:
           $ref: '#/definitions/handlers.loginRequest'
+      - description: User 2FA Code
+        in: query
+        name: 2FACode
+        type: string
       produces:
       - application/json
       responses:
@@ -191,7 +195,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/handlers.loginSampleResponseError500'
-      summary: Login to FamTrust
+      summary: Login to FamTrust (Supports 2FA by Email)
       tags:
       - User-Authentication
   /profile:

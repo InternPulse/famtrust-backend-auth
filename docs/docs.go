@@ -17,7 +17,7 @@ const docTemplate = `{
     "paths": {
         "/login": {
             "post": {
-                "description": "Login to FamTrust",
+                "description": "Login to FamTrust (Supports 2FA by Email)",
                 "consumes": [
                     "application/json"
                 ],
@@ -27,17 +27,23 @@ const docTemplate = `{
                 "tags": [
                     "User-Authentication"
                 ],
-                "summary": "Login to FamTrust",
+                "summary": "Login to FamTrust (Supports 2FA by Email)",
                 "operationId": "login",
                 "parameters": [
                     {
                         "description": "User Credentials",
-                        "name": "credentials",
+                        "name": "Credentials",
                         "in": "body",
                         "required": true,
                         "schema": {
                             "$ref": "#/definitions/handlers.loginRequest"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "User 2FA Code",
+                        "name": "2FACode",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -512,7 +518,7 @@ var SwaggerInfo = &swag.Spec{
 	BasePath:         "/api/v1/",
 	Schemes:          []string{},
 	Title:            "FamTrust API Backend - Auth",
-	Description:      "This is the Authentication and Authrization micro-service for the FamTrust Web App.",
+	Description:      "This is the Authentication and Authorization Micro-service for the FamTrust Web App.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/InternPulse/famtrust-backend-auth/internal/interfaces"
@@ -14,8 +15,8 @@ type UserHandlers struct {
 	mailer interfaces.Mailer
 }
 
-// @Summary		Login to FamTrust
-// @Description	Login to FamTrust
+// @Summary		Login to FamTrust (Supports 2FA by Email)
+// @Description	Login to FamTrust (Supports 2FA by Email)
 // @Tags			User-Authentication
 // @ID				login
 // @Accept			json
@@ -23,7 +24,8 @@ type UserHandlers struct {
 // @Failure		401	{object}	loginSampleResponseError401
 // @Failure		500	{object}	loginSampleResponseError500
 // @Success		200	{object}	loginSampleResponse200
-// @Param			credentials	body	loginRequest	true	"User Credentials"
+// @Param			Credentials	body	loginRequest	true	"User Credentials"
+// @Param			2FACode	query	string	false	"User 2FA Code"
 // @Router			/login [post]
 func (uh *UserHandlers) Login(c *gin.Context) {
 	var loginPayload loginRequest
@@ -59,6 +61,83 @@ func (uh *UserHandlers) Login(c *gin.Context) {
 		return
 	}
 
+	if user.Has2FA {
+
+		twoFACode := c.Query("2FACode")
+		// If no 2FA code is passed in, generate one
+		if twoFACode == "" {
+
+			verCode := interfaces.VerCode{
+				UserID: user.ID,
+				Type:   "2fa",
+			}
+			// TODO: Create verification codes that expire
+			err := uh.models.VerCodes().CreateVerificationCode(&verCode)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, loginResponse{
+					StatusCode: http.StatusInternalServerError,
+					Status:     "error",
+					Message:    "An error occured",
+				})
+				return
+			}
+
+			// Make 6 digit 2FA code from first and last 3 digits of UUID Token
+			verCodeStr := verCode.ID.String()
+			code := verCodeStr[:3] + verCodeStr[len(verCodeStr)-3:]
+
+			// Send as email
+			verEmail := interfaces.EmailMsg{
+				Subject: "Your FamTrust 2FA Code",
+				From:    "FamTrust <biz@famtrust.biz>",
+				To:      user.Email,
+				BodyText: fmt.Sprintf("Hello there! \n"+
+					"You've requested a 2FA code to login to your FamTrust account. \n"+
+					"Use the code below to login. \n\n\n"+
+					"\"%s\"", code),
+			}
+
+			if err = uh.mailer.SendMail(&verEmail); err != nil {
+				c.JSON(http.StatusInternalServerError, loginResponse{
+					StatusCode: http.StatusInternalServerError,
+					Status:     "error",
+					Message:    "Failed to user's 2FA Code, an error occured",
+				})
+				return
+
+			} else {
+				c.JSON(http.StatusOK, loginResponse{
+					StatusCode: http.StatusOK,
+					Status:     "success",
+					Message:    "User has 2FA. Code has been sent to user's email",
+				})
+				return
+			}
+
+		} else {
+			code, err := uh.models.VerCodes().Get2FACodeByID(user.ID)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, loginResponse{
+					StatusCode: http.StatusInternalServerError,
+					Status:     "error",
+					Message:    "An error occured",
+				})
+				return
+			}
+
+			codeStr := code.ID.String()
+			if (codeStr[:3] + codeStr[len(codeStr)-3:]) != twoFACode {
+				c.JSON(http.StatusUnauthorized, loginResponse{
+					StatusCode: http.StatusUnauthorized,
+					Status:     "error",
+					Message:    "Invalid 2FA Code",
+				})
+				return
+			}
+
+		}
+	}
+
 	token, err := jwtmod.GenerateJWT(user.ID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, loginResponse{
@@ -66,6 +145,7 @@ func (uh *UserHandlers) Login(c *gin.Context) {
 			Status:     "error",
 			Message:    "An error has occured",
 		})
+		return
 	}
 
 	payload := loginResponse{
