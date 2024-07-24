@@ -25,6 +25,7 @@ type UserModels interface {
 	GetUserByBVN(bvn int) (*User, error)
 	GetUserByNIN(nin int) (*User, error)
 	SetIsVerified(userID uuid.UUID, value bool) error
+	GetUsersByDefaultGroup(groupID uuid.UUID) (*[]User, error)
 }
 
 type UserRoles interface {
@@ -69,15 +70,15 @@ func (u *UUIDModel) BeforeCreate(tx *gorm.DB) (err error) {
 
 type User struct {
 	UUIDModel
-	Email        string      `gorm:"not null;unique"`
-	PasswordHash string      `gorm:"not null"`
-	RoleID       string      `gorm:"not null"`
-	Has2FA       bool        `gorm:"column:has_2fa;not null"`
-	IsVerified   bool        `gorm:"not null"`
-	IsFreezed    bool        `gorm:"not null"`
-	LastLogin    time.Time   `gorm:"not null"`
-	Role         Role        `gorm:"foreignKey:RoleID;references:ID"`
-	UserProfile  UserProfile `gorm:"foreignKey:UserID;references:ID;constraints:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	Email        string      `json:"email" gorm:"not null;unique"`
+	PasswordHash string      `json:"_" gorm:"not null"`
+	RoleID       string      `json:"roleId" gorm:"not null"`
+	Has2FA       bool        `json:"has2FA" gorm:"column:has_2fa;not null"`
+	IsVerified   bool        `json:"isVerified" gorm:"not null"`
+	IsFreezed    bool        `json:"isFreezed" gorm:"not null"`
+	LastLogin    time.Time   `json:"lastLogin" gorm:"not null"`
+	Role         Role        `json:"role" gorm:"foreignKey:RoleID;references:ID"`
+	UserProfile  UserProfile `json:"userProfile" gorm:"foreignKey:UserID;references:ID;constraints:OnUpdate:CASCADE,OnDelete:CASCADE"`
 }
 
 type UserProfile struct {

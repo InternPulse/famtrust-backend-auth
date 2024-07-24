@@ -11,12 +11,19 @@ type loginRequest struct {
 	Password string `json:"password" binding:"required"`
 }
 
-type loginResponse struct {
+type verifyResponse struct {
 	StatusCode uint          `json:"statusCode"`
 	Status     string        `json:"status"`
 	Message    string        `json:"message"`
 	Token      string        `json:"token,omitempty"`
 	User       loginUserData `json:"user,omitempty"`
+}
+
+type loginResponse struct {
+	StatusCode uint   `json:"statusCode"`
+	Status     string `json:"status"`
+	Message    string `json:"message"`
+	Token      string `json:"token,omitempty"`
 }
 
 type loginUserData struct {

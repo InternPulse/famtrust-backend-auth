@@ -163,7 +163,7 @@ paths:
   /create-user:
     post:
       consumes:
-      - application/json
+      - multipart/form-data
       description: Create a Sub-User/Member User Account
       operationId: create-user
       parameters:
@@ -264,7 +264,7 @@ paths:
   /signup:
     post:
       consumes:
-      - application/json
+      - multipart/form-data
       description: Create an Admin/Main User Account
       operationId: signup
       parameters:
@@ -296,6 +296,32 @@ paths:
       summary: Create an Admin/Main User Account
       tags:
       - User-Accounts
+  /users/by/default-group:
+    get:
+      consumes:
+      - application/json
+      description: Get Users by Group ID
+      operationId: users-by-groupID
+      parameters:
+      - description: Group ID to filter Users By
+        in: formData
+        name: groupID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.loginSampleResponseError500'
+      summary: Get Users by Group ID
+      tags:
+      - Retrieve-Users
   /validate:
     get:
       consumes:
@@ -324,7 +350,8 @@ paths:
       - User-Authentication
   /verify-bvn:
     get:
-      description: Verify User Signup BVN
+      description: Verify User Signup BVN - Currently this is any 10 digit positive
+        integer not currently in use by another user.
       operationId: verify-bvn
       parameters:
       - description: BVN
@@ -386,7 +413,8 @@ paths:
       - Verifications
   /verify-nin:
     get:
-      description: Verify User Signup NIN
+      description: Verify User Signup NIN - Currently this is any 10 digit positive
+        integer not currently in use by another user.
       operationId: verify-nin
       parameters:
       - description: NIN

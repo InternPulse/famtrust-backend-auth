@@ -19,7 +19,7 @@ const docTemplate = `{
             "post": {
                 "description": "Create a Sub-User/Member User Account",
                 "consumes": [
-                    "application/json"
+                    "multipart/form-data"
                 ],
                 "produces": [
                     "application/json"
@@ -171,7 +171,7 @@ const docTemplate = `{
             "post": {
                 "description": "Create an Admin/Main User Account",
                 "consumes": [
-                    "application/json"
+                    "multipart/form-data"
                 ],
                 "produces": [
                     "application/json"
@@ -201,6 +201,45 @@ const docTemplate = `{
                         "description": "Optional true or false value to set new user 2FA preference",
                         "name": "has2FA",
                         "in": "formData"
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.loginSampleResponseError500"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/by/default-group": {
+            "get": {
+                "description": "Get Users by Group ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Retrieve-Users"
+                ],
+                "summary": "Get Users by Group ID",
+                "operationId": "users-by-groupID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Group ID to filter Users By",
+                        "name": "groupID",
+                        "in": "formData",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -262,7 +301,7 @@ const docTemplate = `{
         },
         "/verify-bvn": {
             "get": {
-                "description": "Verify User Signup BVN",
+                "description": "Verify User Signup BVN - Currently this is any 10 digit positive integer not currently in use by another user.",
                 "produces": [
                     "application/json"
                 ],
@@ -357,7 +396,7 @@ const docTemplate = `{
         },
         "/verify-nin": {
             "get": {
-                "description": "Verify User Signup NIN",
+                "description": "Verify User Signup NIN - Currently this is any 10 digit positive integer not currently in use by another user.",
                 "produces": [
                     "application/json"
                 ],

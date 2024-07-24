@@ -32,6 +32,9 @@ func (app *Config) routes() *gin.Engine {
 	// v1.POST("/delete-user", app.Handlers.Users().DeleteUser)
 	// v1.GET("/reset-password", app.Handlers.Users().ResetPassword)
 
+	getUsers := v1.Group("/users/by")
+	getUsers.GET("/default-group", app.Handlers.Users().GetUsersByDefaultGroup)
+
 	// // Verification Routes
 	v1.GET("/verify-nin", app.Handlers.Verifications().VerifyNIN)
 	v1.GET("/verify-bvn", app.Handlers.Verifications().VerifyBVN)

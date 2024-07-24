@@ -173,7 +173,7 @@ func (v *VerificationHandlers) VerifyEmailToken(c *gin.Context) {
 }
 
 // @Summary		Verify User Signup NIN
-// @Description	Verify User Signup NIN
+// @Description	Verify User Signup NIN - Currently this is any 10 digit positive integer not currently in use by another user.
 // @Tags			Verifications
 // @ID				verify-nin
 // @Produce		json
@@ -229,7 +229,7 @@ func (v *VerificationHandlers) VerifyNIN(c *gin.Context) {
 }
 
 // @Summary		Verify User Signup BVN
-// @Description	Verify User Signup BVN
+// @Description	Verify User Signup BVN - Currently this is any 10 digit positive integer not currently in use by another user.
 // @Tags			Verifications
 // @ID				verify-bvn
 // @Produce		json

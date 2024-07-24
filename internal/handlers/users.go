@@ -239,7 +239,7 @@ func (uh *UserHandlers) Validate(c *gin.Context) {
 		Role:       role,
 	}
 
-	payload := loginResponse{
+	payload := verifyResponse{
 		StatusCode: http.StatusOK,
 		Status:     "success",
 		Message:    "User session is valid",
@@ -254,7 +254,7 @@ func (uh *UserHandlers) Validate(c *gin.Context) {
 // @Description	Create an Admin/Main User Account
 // @Tags			User-Accounts
 // @ID				signup
-// @Accept			json
+// @Accept			mpfd
 // @Produce		json
 // @Failure		400
 // @Failure		500	{object}	loginSampleResponseError500
@@ -270,19 +270,19 @@ func (uh *UserHandlers) Signup(c *gin.Context) {
 
 	case strings.Contains(c.GetHeader("Content-Type"), "application/x-www-form-urlencoded"):
 	case strings.Contains(c.GetHeader("Content-Type"), "multipart/form-data"):
-		form, err := c.MultipartForm()
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"statusCode": http.StatusBadRequest,
-				"status":     "error",
-				"message":    "Failed to parse form",
-			})
-			return
-		}
+		// form, err := c.MultipartForm()
+		// if err != nil {
+		// 	c.JSON(http.StatusBadRequest, gin.H{
+		// 		"statusCode": http.StatusBadRequest,
+		// 		"status":     "error",
+		// 		"message":    "Failed to parse form",
+		// 	})
+		// 	return
+		// }
 
-		email := form.Value["email"][0]
-		password := form.Value["password"][0]
-		has2FAStr := form.Value["has2FA"][0]
+		email := c.PostForm("email")
+		password := c.PostForm("password")
+		has2FAStr := c.PostForm("has2FA")
 
 		// image := form.File["image"][0]
 		// if image != nil {
@@ -353,6 +353,14 @@ func (uh *UserHandlers) Signup(c *gin.Context) {
 
 	err := uh.models.Users().CreateUser(&user)
 	if err != nil {
+		if strings.Contains(err.Error(), "duplicate key value") {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"statusCode": http.StatusBadRequest,
+				"status":     "error",
+				"message":    "A user with that email already exists",
+			})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"statusCode": http.StatusInternalServerError,
 			"status":     "error",
@@ -383,7 +391,7 @@ func (uh *UserHandlers) Signup(c *gin.Context) {
 // @Description	Create a Sub-User/Member User Account
 // @Tags			User-Accounts
 // @ID				create-user
-// @Accept			json
+// @Accept			mpfd
 // @Produce		json
 // @Failure		400
 // @Failure		500	{object}	loginSampleResponseError500
@@ -400,20 +408,11 @@ func (uh *UserHandlers) CreateUser(c *gin.Context) {
 
 	case strings.Contains(c.GetHeader("Content-Type"), "application/x-www-form-urlencoded"):
 	case strings.Contains(c.GetHeader("Content-Type"), "multipart/form-data"):
-		form, err := c.MultipartForm()
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"statusCode": http.StatusBadRequest,
-				"status":     "error",
-				"message":    "Failed to parse form",
-			})
-			return
-		}
 
-		email := form.Value["email"][0]
-		password := form.Value["password"][0]
-		has2FAStr := form.Value["has2FA"][0]
-		roleID := form.Value["roleID"][0]
+		email := c.PostForm("email")
+		password := c.PostForm("password")
+		has2FAStr := c.PostForm("has2FA")
+		roleID := c.PostForm("roleID")
 
 		if email == "" || password == "" {
 			c.JSON(http.StatusBadRequest, gin.H{
@@ -455,11 +454,9 @@ func (uh *UserHandlers) CreateUser(c *gin.Context) {
 		}
 		passwordHash := string(bytes)
 
-		user = interfaces.User{
-			Email:        email,
-			PasswordHash: passwordHash,
-			LastLogin:    time.Now(),
-		}
+		user.Email = email
+		user.PasswordHash = passwordHash
+		user.LastLogin = time.Now()
 
 	default:
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -475,6 +472,14 @@ func (uh *UserHandlers) CreateUser(c *gin.Context) {
 
 	err := uh.models.Users().CreateUser(&user)
 	if err != nil {
+		if strings.Contains(err.Error(), "duplicate key value") {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"statusCode": http.StatusBadRequest,
+				"status":     "error",
+				"message":    "A user with that email already exists",
+			})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"statusCode": http.StatusInternalServerError,
 			"status":     "error",
@@ -488,4 +493,57 @@ func (uh *UserHandlers) CreateUser(c *gin.Context) {
 		"status":     "success",
 		"message":    "User created successfully. User can sign in now",
 	})
+}
+
+// @Summary		Get Users by Group ID
+// @Description	Get Users by Group ID
+// @Tags			Retrieve-Users
+// @ID				users-by-groupID
+// @Accept			json
+// @Produce		json
+// @Failure		400
+// @Failure		500	{object}	loginSampleResponseError500
+// @Success		201
+// @Param groupID formData string true "Group ID to filter Users By"
+// @Router			/users/by/default-group [get]
+func (uh *UserHandlers) GetUsersByDefaultGroup(c *gin.Context) {
+
+	groupIDStr := c.Query("groupID")
+	if groupIDStr == "" {
+		c.JSON(http.StatusBadRequest, loginResponse{
+			StatusCode: http.StatusBadRequest,
+			Status:     "error",
+			Message:    "Invalid Group ID",
+		})
+		return
+	}
+
+	groupID, err := uuid.Parse(groupIDStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, loginResponse{
+			StatusCode: http.StatusBadRequest,
+			Status:     "error",
+			Message:    "Invalid Group ID",
+		})
+		return
+	}
+
+	// validate the user against the database
+	users, err := uh.models.Users().GetUsersByDefaultGroup(groupID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, loginResponse{
+			StatusCode: http.StatusInternalServerError,
+			Status:     "error",
+			Message:    "An error occured while retrieving users",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"statusCode": http.StatusOK,
+		"status":     "success",
+		"message":    "Users retrieved successfully",
+		"users":      users,
+	})
+
 }

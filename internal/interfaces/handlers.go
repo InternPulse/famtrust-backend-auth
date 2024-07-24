@@ -13,8 +13,11 @@ type UserHandlers interface {
 	CreateUser(c *gin.Context)
 	Login(c *gin.Context)
 	Validate(c *gin.Context)
-	GetUserProfileByID(c *gin.Context)
 	// ResetPassword(c *gin.Context)
+
+	GetUserProfileByID(c *gin.Context)
+
+	GetUsersByDefaultGroup(c *gin.Context)
 }
 
 type VerificationHandlers interface {
