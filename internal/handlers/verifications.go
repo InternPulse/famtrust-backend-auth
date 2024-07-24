@@ -75,7 +75,8 @@ func (v *VerificationHandlers) VerifyEmail(c *gin.Context) {
 		}
 
 		// create verification link
-		verLink := c.Request.Host + c.Request.URL.Path + "/verify" + "?code=" + verCode.ID.String()
+		// Note: I hardcoded 'https://'
+		verLink := "https://" + c.Request.Host + c.Request.URL.Path + "/verify" + "?code=" + verCode.ID.String()
 
 		// send as email
 		verEmail := interfaces.EmailMsg{
