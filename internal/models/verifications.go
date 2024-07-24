@@ -27,14 +27,14 @@ func (v *VerificationCodes) Get2FACodeByUserID(UserID uuid.UUID) (*interfaces.Ve
 }
 
 func (v *VerificationCodes) DeleteEmailCodeByUserID(UserID uuid.UUID) error {
-	if err := v.DB.Delete(&interfaces.VerCode{}).Where("type = ?", "email").Where("user_id = ?", UserID).Error; err != nil {
+	if err := v.DB.Where("type = ?", "email").Where("user_id = ?", UserID).Delete(&interfaces.VerCode{}).Error; err != nil {
 		return err
 	}
 	return nil
 }
 
 func (v *VerificationCodes) Delete2FACodeByUserID(UserID uuid.UUID) error {
-	if err := v.DB.Delete(&interfaces.VerCode{}).Where("type = ?", "2fa").Where("user_id = ?", UserID).Error; err != nil {
+	if err := v.DB.Where("type = ?", "2fa").Where("user_id = ?", UserID).Delete(&interfaces.VerCode{}).Error; err != nil {
 		return err
 	}
 	return nil
