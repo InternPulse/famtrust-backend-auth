@@ -10,16 +10,31 @@ type VerificationCodes struct {
 	DB *gorm.DB
 }
 
-func (v *VerificationCodes) GetCodeByID(codeID uuid.UUID) (*interfaces.VerCode, error) {
+func (v *VerificationCodes) GetEmailCodeByID(codeID uuid.UUID) (*interfaces.VerCode, error) {
 	var profile interfaces.VerCode
-	if err := v.DB.First(&profile, codeID).Error; err != nil {
+	if err := v.DB.Where("type = ?", "email").First(&profile, codeID).Error; err != nil {
 		return nil, err
 	}
 	return &profile, nil
 }
 
-func (v *VerificationCodes) DeleteCodeByID(codeID uuid.UUID) error {
-	if err := v.DB.Delete(&interfaces.VerCode{}, codeID).Error; err != nil {
+func (v *VerificationCodes) Get2FACodeByID(codeID uuid.UUID) (*interfaces.VerCode, error) {
+	var profile interfaces.VerCode
+	if err := v.DB.Where("type = ?", "2fa").First(&profile, codeID).Error; err != nil {
+		return nil, err
+	}
+	return &profile, nil
+}
+
+func (v *VerificationCodes) DeleteEmailCodeByID(codeID uuid.UUID) error {
+	if err := v.DB.Where("type = ?", "email").Delete(&interfaces.VerCode{}, codeID).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func (v *VerificationCodes) Delete2FACodeByID(codeID uuid.UUID) error {
+	if err := v.DB.Where("type = ?", "2fa").Delete(&interfaces.VerCode{}, codeID).Error; err != nil {
 		return err
 	}
 	return nil
