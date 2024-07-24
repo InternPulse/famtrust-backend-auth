@@ -65,6 +65,13 @@ func (u *UserModels) PasswordMatches(passwordHash string, plainText string) (boo
 	return true, nil
 }
 
+func (u *UserModels) CreateUserProfile(profile *interfaces.UserProfile) error {
+	if err := u.DB.Create(&profile).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
 func (u *UserModels) GetUserProfileByID(userID uuid.UUID) (*interfaces.UserProfile, error) {
 	var profile interfaces.UserProfile
 	if err := u.DB.Where("user_id = ?", userID).First(&profile).Error; err != nil {

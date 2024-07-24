@@ -15,8 +15,12 @@ type UserHandlers interface {
 	Validate(c *gin.Context)
 	// ResetPassword(c *gin.Context)
 
+	// User Profiles
 	GetUserProfileByID(c *gin.Context)
+	CreateUserProfile(c *gin.Context)
+	GetProfilePicture(c *gin.Context)
 
+	// Get Users By...
 	GetUsersByDefaultGroup(c *gin.Context)
 }
 

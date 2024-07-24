@@ -16,16 +16,16 @@ type VerificationHandlers struct {
 	mailer interfaces.Mailer
 }
 
-// @Summary		Send User-Email Verification Token
-// @Description	Send User-Email Verification Token
-// @Tags			Verifications
-// @ID				send-verify-token
-// @Security BearerAuth
-// @Produce		json
-// @Failure		400
-// @Failure		500
-// @Success		200
-// @Router			/verify-email [get]
+//	@Summary		Send User-Email Verification Token
+//	@Description	Send User-Email Verification Token
+//	@Tags			Verifications
+//	@ID				send-verify-token
+//	@Security		BearerAuth
+//	@Produce		json
+//	@Failure		400
+//	@Failure		500
+//	@Success		200
+//	@Router			/verify-email [get]
 func (v *VerificationHandlers) VerifyEmail(c *gin.Context) {
 
 	UserID, exists := c.Get("UserID")
@@ -110,16 +110,16 @@ func (v *VerificationHandlers) VerifyEmail(c *gin.Context) {
 	}
 }
 
-// @Summary		Verify User Email Address via Token
-// @Description	Verify User Email Address via Token
-// @Tags			Verifications
-// @ID				verify-email-token
-// @Produce		json
-// @Failure		400
-// @Failure		500
-// @Success		200
-// @Param code query string true "Email verification Token"
-// @Router			/verify-email/verify [get]
+//	@Summary		Verify User Email Address via Token
+//	@Description	Verify User Email Address via Token
+//	@Tags			Verifications
+//	@ID				verify-email-token
+//	@Produce		json
+//	@Failure		400
+//	@Failure		500
+//	@Success		200
+//	@Param			code	query	string	true	"Email verification Token"
+//	@Router			/verify-email/verify [get]
 func (v *VerificationHandlers) VerifyEmailToken(c *gin.Context) {
 	verCode := c.Query("code")
 
@@ -172,16 +172,16 @@ func (v *VerificationHandlers) VerifyEmailToken(c *gin.Context) {
 	})
 }
 
-// @Summary		Verify User Signup NIN
-// @Description	Verify User Signup NIN - Currently this is any 10 digit positive integer not currently in use by another user.
-// @Tags			Verifications
-// @ID				verify-nin
-// @Produce		json
-// @Failure		400
-// @Failure		500
-// @Success		200
-// @Param nin query int true "NIN"
-// @Router			/verify-nin [get]
+//	@Summary		Verify User Signup NIN
+//	@Description	Verify User Signup NIN - Currently this is any 10 digit positive integer not currently in use by another user.
+//	@Tags			Verifications
+//	@ID				verify-nin
+//	@Produce		json
+//	@Failure		400
+//	@Failure		500
+//	@Success		200
+//	@Param			nin	query	int	true	"NIN"
+//	@Router			/verify-nin [get]
 func (v *VerificationHandlers) VerifyNIN(c *gin.Context) {
 	ninStr := c.Query("nin")
 	if ninStr != "" {
@@ -228,16 +228,16 @@ func (v *VerificationHandlers) VerifyNIN(c *gin.Context) {
 	}
 }
 
-// @Summary		Verify User Signup BVN
-// @Description	Verify User Signup BVN - Currently this is any 10 digit positive integer not currently in use by another user.
-// @Tags			Verifications
-// @ID				verify-bvn
-// @Produce		json
-// @Failure		400
-// @Failure		500
-// @Success		200
-// @Param bvn query int true "BVN"
-// @Router			/verify-bvn [get]
+//	@Summary		Verify User Signup BVN
+//	@Description	Verify User Signup BVN - Currently this is any 10 digit positive integer not currently in use by another user.
+//	@Tags			Verifications
+//	@ID				verify-bvn
+//	@Produce		json
+//	@Failure		400
+//	@Failure		500
+//	@Success		200
+//	@Param			bvn	query	int	true	"BVN"
+//	@Router			/verify-bvn [get]
 func (v *VerificationHandlers) VerifyBVN(c *gin.Context) {
 	bvnStr := c.Query("bvn")
 	if bvnStr != "" {

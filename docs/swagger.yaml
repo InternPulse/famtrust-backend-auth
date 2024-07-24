@@ -200,6 +200,26 @@ paths:
       summary: Create a Sub-User/Member User Account
       tags:
       - User-Accounts
+  /images/profile-pic/{imageName}:
+    get:
+      description: Get User Profile Picture
+      operationId: get-profile-pic
+      parameters:
+      - description: Picture Filename
+        in: path
+        name: imageName
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "404":
+          description: Not Found
+      summary: Get User Profile Picture
+      tags:
+      - User-Profiles
   /login:
     post:
       consumes:
@@ -261,6 +281,54 @@ paths:
       summary: Retrieve User Profile Details
       tags:
       - User-Profiles
+  /profile/create:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Create New User Profile
+      operationId: create-profile
+      parameters:
+      - description: User's first name
+        in: formData
+        name: firstName
+        required: true
+        type: string
+      - description: User's last name
+        in: formData
+        name: lastName
+        required: true
+        type: string
+      - description: User's biography
+        in: formData
+        name: bio
+        required: true
+        type: string
+      - description: User's National Identification Number
+        in: formData
+        name: nin
+        type: integer
+      - description: User's Bank Verification Number
+        in: formData
+        name: bvn
+        type: integer
+      - description: User's default group ID
+        in: formData
+        name: defaultGroupID
+        required: true
+        type: string
+      - description: User's profile picture
+        in: formData
+        name: profilePicture
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses: {}
+      security:
+      - BearerAuth: []
+      summary: Create New User Profile
+      tags:
+      - User-Profiles
   /signup:
     post:
       consumes:
@@ -304,7 +372,7 @@ paths:
       operationId: users-by-groupID
       parameters:
       - description: Group ID to filter Users By
-        in: query
+        in: formData
         name: groupID
         required: true
         type: string

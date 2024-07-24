@@ -20,18 +20,18 @@ type UserHandlers struct {
 	mailer interfaces.Mailer
 }
 
-// @Summary		Login to FamTrust (Supports 2FA by Email)
-// @Description	Login to FamTrust (Supports 2FA by Email)
-// @Tags			User-Authentication
-// @ID				login
-// @Accept			json
-// @Produce		json
-// @Failure		401	{object}	loginSampleResponseError401
-// @Failure		500	{object}	loginSampleResponseError500
-// @Success		200	{object}	loginSampleResponse200
-// @Param			Credentials	body	loginRequest	true	"User Credentials"
-// @Param			2FACode	query	string	false	"User 2FA Code"
-// @Router			/login [post]
+//	@Summary		Login to FamTrust (Supports 2FA by Email)
+//	@Description	Login to FamTrust (Supports 2FA by Email)
+//	@Tags			User-Authentication
+//	@ID				login
+//	@Accept			json
+//	@Produce		json
+//	@Failure		401			{object}	loginSampleResponseError401
+//	@Failure		500			{object}	loginSampleResponseError500
+//	@Success		200			{object}	loginSampleResponse200
+//	@Param			Credentials	body		loginRequest	true	"User Credentials"
+//	@Param			2FACode		query		string			false	"User 2FA Code"
+//	@Router			/login [post]
 func (uh *UserHandlers) Login(c *gin.Context) {
 	var loginPayload loginRequest
 
@@ -173,17 +173,17 @@ func (uh *UserHandlers) Login(c *gin.Context) {
 	c.JSON(http.StatusOK, payload)
 }
 
-// @Summary		Validate User Login Token
-// @Description	Validate User Login Token
-// @Tags			User-Authentication
-// @ID				validate
-// @Accept			json
-// @Produce		json
-// @Failure		401	{object}	loginSampleResponseError401
-// @Failure		500	{object}	loginSampleResponseError500
-// @Success		200	{object}	validateSampleResponse200
-// @Security		BearerAuth
-// @Router			/validate [get]
+//	@Summary		Validate User Login Token
+//	@Description	Validate User Login Token
+//	@Tags			User-Authentication
+//	@ID				validate
+//	@Accept			json
+//	@Produce		json
+//	@Failure		401	{object}	loginSampleResponseError401
+//	@Failure		500	{object}	loginSampleResponseError500
+//	@Success		200	{object}	validateSampleResponse200
+//	@Security		BearerAuth
+//	@Router			/validate [get]
 func (uh *UserHandlers) Validate(c *gin.Context) {
 	UserID, exists := c.Get("UserID")
 	if !exists {
@@ -250,19 +250,19 @@ func (uh *UserHandlers) Validate(c *gin.Context) {
 	c.JSON(http.StatusOK, payload)
 }
 
-// @Summary		Create an Admin/Main User Account
-// @Description	Create an Admin/Main User Account
-// @Tags			User-Accounts
-// @ID				signup
-// @Accept			mpfd
-// @Produce		json
-// @Failure		400
-// @Failure		500	{object}	loginSampleResponseError500
-// @Success		201
-// @Param email formData string true "Email of the new user"
-// @Param password formData string true "Password of the new user"
-// @Param has2FA formData string false "Optional true or false value to set new user 2FA preference"
-// @Router			/signup [post]
+//	@Summary		Create an Admin/Main User Account
+//	@Description	Create an Admin/Main User Account
+//	@Tags			User-Accounts
+//	@ID				signup
+//	@Accept			mpfd
+//	@Produce		json
+//	@Failure		400
+//	@Failure		500	{object}	loginSampleResponseError500
+//	@Success		201
+//	@Param			email		formData	string	true	"Email of the new user"
+//	@Param			password	formData	string	true	"Password of the new user"
+//	@Param			has2FA		formData	string	false	"Optional true or false value to set new user 2FA preference"
+//	@Router			/signup [post]
 func (uh *UserHandlers) Signup(c *gin.Context) {
 	var user interfaces.User
 
@@ -387,20 +387,20 @@ func (uh *UserHandlers) Signup(c *gin.Context) {
 	})
 }
 
-// @Summary		Create a Sub-User/Member User Account
-// @Description	Create a Sub-User/Member User Account
-// @Tags			User-Accounts
-// @ID				create-user
-// @Accept			mpfd
-// @Produce		json
-// @Failure		400
-// @Failure		500	{object}	loginSampleResponseError500
-// @Success		201
-// @Param email formData string true "Email of the new user"
-// @Param password formData string true "Password of the new user"
-// @Param roleID formData string false "Optional Role ID string for new user. Defaults to 'member' if not specified"
-// @Param has2FA formData string false "Optional true or false value to set new user 2FA preference"
-// @Router			/create-user [post]
+//	@Summary		Create a Sub-User/Member User Account
+//	@Description	Create a Sub-User/Member User Account
+//	@Tags			User-Accounts
+//	@ID				create-user
+//	@Accept			mpfd
+//	@Produce		json
+//	@Failure		400
+//	@Failure		500	{object}	loginSampleResponseError500
+//	@Success		201
+//	@Param			email		formData	string	true	"Email of the new user"
+//	@Param			password	formData	string	true	"Password of the new user"
+//	@Param			roleID		formData	string	false	"Optional Role ID string for new user. Defaults to 'member' if not specified"
+//	@Param			has2FA		formData	string	false	"Optional true or false value to set new user 2FA preference"
+//	@Router			/create-user [post]
 func (uh *UserHandlers) CreateUser(c *gin.Context) {
 	var user interfaces.User
 
@@ -495,17 +495,17 @@ func (uh *UserHandlers) CreateUser(c *gin.Context) {
 	})
 }
 
-// @Summary		Get Users by Group ID
-// @Description	Get Users by Group ID
-// @Tags			Retrieve-Users
-// @ID				users-by-groupID
-// @Accept			json
-// @Produce		json
-// @Failure		400
-// @Failure		500	{object}	loginSampleResponseError500
-// @Success		201
-// @Param groupID formData string true "Group ID to filter Users By"
-// @Router			/users/by/default-group [get]
+//	@Summary		Get Users by Group ID
+//	@Description	Get Users by Group ID
+//	@Tags			Retrieve-Users
+//	@ID				users-by-groupID
+//	@Accept			json
+//	@Produce		json
+//	@Failure		400
+//	@Failure		500	{object}	loginSampleResponseError500
+//	@Success		201
+//	@Param			groupID	formData	string	true	"Group ID to filter Users By"
+//	@Router			/users/by/default-group [get]
 func (uh *UserHandlers) GetUsersByDefaultGroup(c *gin.Context) {
 
 	groupIDStr := c.Query("groupID")

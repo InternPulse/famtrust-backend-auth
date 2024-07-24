@@ -1,9 +1,14 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
+	"os"
+	"path/filepath"
+	"strconv"
 	"strings"
 
+	"github.com/InternPulse/famtrust-backend-auth/internal/interfaces"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
@@ -59,4 +64,337 @@ func (uh *UserHandlers) GetUserProfileByID(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, payload)
+}
+
+// @Summary		Create New User Profile
+// @Description	Create New User Profile
+// @Tags			User-Profiles
+// @ID				create-profile
+// @Security		BearerAuth
+// @Accept			multipart/form-data
+// @Produce		json
+// @Param			firstName		formData	string	true	"User's first name"
+// @Param			lastName		formData	string	true	"User's last name"
+// @Param			bio				formData	string	true	"User's biography"
+// @Param			nin				formData	int		false	"User's National Identification Number"
+// @Param			bvn				formData	int		false	"User's Bank Verification Number"
+// @Param			defaultGroupID	formData	string	true	"User's default group ID"
+// @Param			profilePicture	formData	file	true	"User's profile picture"
+// @Router			/profile/create [post]
+func (uh *UserHandlers) CreateUserProfile(c *gin.Context) {
+
+	var profile interfaces.UserProfile
+
+	switch {
+
+	case strings.Contains(c.GetHeader("Content-Type"), "application/x-www-form-urlencoded"):
+	case strings.Contains(c.GetHeader("Content-Type"), "multipart/form-data"):
+
+		UserID, exists := c.Get("UserID")
+		if !exists {
+			c.JSON(http.StatusInternalServerError, loginResponse{
+				StatusCode: http.StatusInternalServerError,
+				Status:     "error",
+				Message:    "An error occured",
+			})
+			return
+		}
+
+		firstName := c.PostForm("firstName")
+		lastName := c.PostForm("lastName")
+		bio := c.PostForm("bio")
+		ninStr := c.PostForm("nin")
+		bvnStr := c.PostForm("bvn")
+		defaultGroupIDStr := c.PostForm("defaultGroupID")
+
+		if firstName == "" || lastName == "" || bio == "" || defaultGroupIDStr == "" {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"statusCode": http.StatusBadRequest,
+				"status":     "error",
+				"message":    "Incomplete required signup Info",
+			})
+			return
+		}
+
+		// Parse NIN
+		if ninStr != "" {
+			nin, err := strconv.ParseUint(ninStr, 10, 64)
+			if err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{
+					"status":  "error",
+					"message": "Invalid value for NIN",
+				})
+				return
+			}
+			profile.NIN = uint(nin)
+		}
+
+		// Parse BVN
+		if bvnStr != "" {
+			bvn, err := strconv.ParseUint(bvnStr, 10, 64)
+			if err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{
+					"status":  "error",
+					"message": "Invalid value for BVN",
+				})
+				return
+			}
+			profile.BVN = uint(bvn)
+		}
+
+		// Parse defaultGroupID
+		defaultGroupID, err := uuid.Parse(defaultGroupIDStr)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"status":  "error",
+				"message": "Invalid value for defaultGroupID",
+			})
+			return
+		}
+
+		// Get profile picture
+		profilePicture, err := c.FormFile("profilePicture")
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"statusCode": http.StatusBadRequest,
+				"status":     "error",
+				"message":    "Error parsing profile picture. Check your upload",
+			})
+			return
+		}
+
+		// Generate a unique filename
+		filename := filepath.Base(profilePicture.Filename)
+		dst := filepath.Join("images", "profilePics", filename)
+		dstURL := filepath.Join("images", "profile-pic", filename)
+
+		// Save the file
+		if err := c.SaveUploadedFile(profilePicture, dst); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		// User values
+		profile.UserID = UserID.(uuid.UUID)
+		profile.FirstName = firstName
+		profile.LastName = lastName
+		profile.Bio = bio
+		profile.DefaultGroup = defaultGroupID
+		profile.ProfilePictureUrl = dstURL
+
+	default:
+		c.JSON(http.StatusBadRequest, gin.H{
+			"statusCode": http.StatusBadRequest,
+			"status":     "error",
+			"message":    "Invalid signup data. Submit valid form-data",
+			"error": gin.H{
+				"error": fmt.Sprintf("You made use of a :%s: header", c.GetHeader("Content-Type")),
+			},
+		})
+		return
+	}
+
+	err := uh.models.Users().CreateUserProfile(&profile)
+	if err != nil {
+		if strings.Contains(err.Error(), "duplicate key value") {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"statusCode": http.StatusBadRequest,
+				"status":     "error",
+				"message":    "User already has a profile",
+			})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"statusCode": http.StatusInternalServerError,
+			"status":     "error",
+			"message":    "An error occured, failed to create user profile",
+		})
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{
+		"statusCode": http.StatusCreated,
+		"status":     "success",
+		"message":    "User profile created successfully",
+	})
+}
+
+// @Summary			Update User Profile
+// @Description		Update User Profile
+// @Tags			User-Profiles
+// @ID				update-profile
+// @Security		BearerAuth
+// @Accept			multipart/form-data
+// @Produce			json
+// @Param			firstName		formData	string	false	"User's first name"
+// @Param			lastName		formData	string	false	"User's last name"
+// @Param			bio				formData	string	false	"User's biography"
+// @Param			nin				formData	int		false	"User's National Identification Number"
+// @Param			bvn				formData	int		false	"User's Bank Verification Number"
+// @Param			defaultGroupID	formData	string	false	"User's default group ID"
+// @Param			profilePicture	formData	file	false	"User's profile picture"
+// @Router			/profile/update [post]
+func (uh *UserHandlers) CreateUserProfile(c *gin.Context) {
+
+	var profile interfaces.UserProfile
+
+	switch {
+
+	case strings.Contains(c.GetHeader("Content-Type"), "application/x-www-form-urlencoded"):
+	case strings.Contains(c.GetHeader("Content-Type"), "multipart/form-data"):
+
+		UserID, exists := c.Get("UserID")
+		if !exists {
+			c.JSON(http.StatusInternalServerError, loginResponse{
+				StatusCode: http.StatusInternalServerError,
+				Status:     "error",
+				Message:    "An error occured",
+			})
+			return
+		}
+
+		firstName := c.PostForm("firstName")
+		lastName := c.PostForm("lastName")
+		bio := c.PostForm("bio")
+		ninStr := c.PostForm("nin")
+		bvnStr := c.PostForm("bvn")
+		defaultGroupIDStr := c.PostForm("defaultGroupID")
+
+		if firstName == "" || lastName == "" || bio == "" || defaultGroupIDStr == "" {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"statusCode": http.StatusBadRequest,
+				"status":     "error",
+				"message":    "Incomplete required signup Info",
+			})
+			return
+		}
+
+		// Parse NIN
+		if ninStr != "" {
+			nin, err := strconv.ParseUint(ninStr, 10, 64)
+			if err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{
+					"status":  "error",
+					"message": "Invalid value for NIN",
+				})
+				return
+			}
+			profile.NIN = uint(nin)
+		}
+
+		// Parse BVN
+		if bvnStr != "" {
+			bvn, err := strconv.ParseUint(bvnStr, 10, 64)
+			if err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{
+					"status":  "error",
+					"message": "Invalid value for BVN",
+				})
+				return
+			}
+			profile.BVN = uint(bvn)
+		}
+
+		// Parse defaultGroupID
+		defaultGroupID, err := uuid.Parse(defaultGroupIDStr)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"status":  "error",
+				"message": "Invalid value for defaultGroupID",
+			})
+			return
+		}
+
+		// Get profile picture
+		profilePicture, err := c.FormFile("profilePicture")
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"statusCode": http.StatusBadRequest,
+				"status":     "error",
+				"message":    "Error parsing profile picture. Check your upload",
+			})
+			return
+		}
+
+		// Generate a unique filename
+		filename := filepath.Base(profilePicture.Filename)
+		dst := filepath.Join("images", "profilePics", filename)
+		dstURL := filepath.Join("images", "profile-pic", filename)
+
+		// Save the file
+		if err := c.SaveUploadedFile(profilePicture, dst); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		// User values
+		profile.UserID = UserID.(uuid.UUID)
+		profile.FirstName = firstName
+		profile.LastName = lastName
+		profile.Bio = bio
+		profile.DefaultGroup = defaultGroupID
+		profile.ProfilePictureUrl = dstURL
+
+	default:
+		c.JSON(http.StatusBadRequest, gin.H{
+			"statusCode": http.StatusBadRequest,
+			"status":     "error",
+			"message":    "Invalid signup data. Submit valid form-data",
+			"error": gin.H{
+				"error": fmt.Sprintf("You made use of a :%s: header", c.GetHeader("Content-Type")),
+			},
+		})
+		return
+	}
+
+	err := uh.models.Users().CreateUserProfile(&profile)
+	if err != nil {
+		if strings.Contains(err.Error(), "duplicate key value") {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"statusCode": http.StatusBadRequest,
+				"status":     "error",
+				"message":    "User already has a profile",
+			})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"statusCode": http.StatusInternalServerError,
+			"status":     "error",
+			"message":    "An error occured, failed to create user profile",
+		})
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{
+		"statusCode": http.StatusCreated,
+		"status":     "success",
+		"message":    "User profile created successfully",
+	})
+}
+
+// @Summary		Get User Profile Picture
+// @Description	Get User Profile Picture
+// @Tags			User-Profiles
+// @ID				get-profile-pic
+// @Produce		json
+// @Failure		404
+// @Success		200
+// @Param			imageName	path	string	true	"Picture Filename"
+// @Router			/images/profile-pic/{imageName} [get]
+func (uh *UserHandlers) GetProfilePicture(c *gin.Context) {
+	imageName := c.Param("imageName")
+
+	imagePath := filepath.Join("images", "profilePics", imageName)
+
+	// Check if the file exists and is not a directory
+	if _, err := os.Stat(imagePath); os.IsNotExist(err) {
+		c.JSON(http.StatusNotFound, gin.H{
+			"statusCode": http.StatusNotFound,
+			"status":     "error",
+			"message":    "File does not exist",
+		})
+		return
+	}
+
+	c.File(imagePath)
 }

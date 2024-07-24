@@ -32,6 +32,9 @@ func (app *Config) routes() *gin.Engine {
 	// v1.POST("/delete-user", app.Handlers.Users().DeleteUser)
 	// v1.GET("/reset-password", app.Handlers.Users().ResetPassword)
 
+	// Get User Profile Picture
+	v1.GET("/images/profile-pic/:imageName", app.Handlers.Users().GetProfilePicture)
+
 	getUsers := v1.Group("/users/by")
 	getUsers.GET("/default-group", app.Handlers.Users().GetUsersByDefaultGroup)
 
@@ -44,10 +47,10 @@ func (app *Config) routes() *gin.Engine {
 	v1.GET("/validate", app.Handlers.AuthMiddleware(), app.Handlers.Users().Validate)
 	v1.GET("/verify-email", app.Handlers.AuthMiddleware(), app.Handlers.Verifications().VerifyEmail)
 
-	// // UserProfile Routes [Protected]
+	// UserProfile Routes [Protected]
 	profile := v1.Group("/profile").Use(app.Handlers.AuthMiddleware())
 	profile.GET("/", app.Handlers.Users().GetUserProfileByID)
-	// profile.POST("/create", app.Handlers.Users().CreateUserProfile)
+	profile.POST("/create", app.Handlers.Users().CreateUserProfile)
 	// profile.PUT("/update", app.Handlers.Users().UpdateUserProfile)
 
 	return mux

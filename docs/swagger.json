@@ -66,6 +66,36 @@
                 }
             }
         },
+        "/images/profile-pic/{imageName}": {
+            "get": {
+                "description": "Get User Profile Picture",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User-Profiles"
+                ],
+                "summary": "Get User Profile Picture",
+                "operationId": "get-profile-pic",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Picture Filename",
+                        "name": "imageName",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                }
+            }
+        },
         "/login": {
             "post": {
                 "description": "Login to FamTrust (Supports 2FA by Email)",
@@ -160,6 +190,77 @@
                 }
             }
         },
+        "/profile/create": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Create New User Profile",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User-Profiles"
+                ],
+                "summary": "Create New User Profile",
+                "operationId": "create-profile",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User's first name",
+                        "name": "firstName",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "User's last name",
+                        "name": "lastName",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "User's biography",
+                        "name": "bio",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "User's National Identification Number",
+                        "name": "nin",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "User's Bank Verification Number",
+                        "name": "bvn",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "User's default group ID",
+                        "name": "defaultGroupID",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "User's profile picture",
+                        "name": "profilePicture",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        },
         "/signup": {
             "post": {
                 "description": "Create an Admin/Main User Account",
@@ -231,7 +332,7 @@
                         "type": "string",
                         "description": "Group ID to filter Users By",
                         "name": "groupID",
-                        "in": "query",
+                        "in": "formData",
                         "required": true
                     }
                 ],

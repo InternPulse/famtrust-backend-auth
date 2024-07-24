@@ -11,6 +11,6 @@ RUN chmod +x ./app
 # build a tiny docker image
 FROM alpine:latest
 # make directory for product images
-RUN mkdir -p /app /images/products
+RUN mkdir -p /app /images/profilePics
 COPY --from=builder /app/app /app
 CMD [ "/app/app" ]
