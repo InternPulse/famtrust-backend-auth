@@ -504,7 +504,7 @@ func (uh *UserHandlers) CreateUser(c *gin.Context) {
 // @Failure		400
 // @Failure		500	{object}	loginSampleResponseError500
 // @Success		201
-// @Param groupID formData string true "Group ID to filter Users By"
+// @Param groupID query string true "Group ID to filter Users By"
 // @Router			/users/by/default-group [get]
 func (uh *UserHandlers) GetUsersByDefaultGroup(c *gin.Context) {
 
