@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -20,18 +21,26 @@ type UserHandlers struct {
 	mailer interfaces.Mailer
 }
 
-//	@Summary		Login to FamTrust (Supports 2FA by Email)
-//	@Description	Login to FamTrust (Supports 2FA by Email)
-//	@Tags			User-Authentication
-//	@ID				login
-//	@Accept			json
-//	@Produce		json
-//	@Failure		401			{object}	loginSampleResponseError401
-//	@Failure		500			{object}	loginSampleResponseError500
-//	@Success		200			{object}	loginSampleResponse200
-//	@Param			Credentials	body		loginRequest	true	"User Credentials"
-//	@Param			2FACode		query		string			false	"User 2FA Code"
-//	@Router			/login [post]
+func (uh *UserHandlers) GetPermissions(permissions []interfaces.Permission) []string {
+	var list []string
+	for _, perm := range permissions {
+		list = append(list, perm.ID)
+	}
+	return list
+}
+
+// @Summary		Login to FamTrust (Supports 2FA by Email)
+// @Description	Login to FamTrust (Supports 2FA by Email)
+// @Tags			User-Authentication
+// @ID				login
+// @Accept			json
+// @Produce		json
+// @Failure		401			{object}	loginSampleResponseError401
+// @Failure		500			{object}	loginSampleResponseError500
+// @Success		200			{object}	loginSampleResponse200
+// @Param			Credentials	body		loginRequest	true	"User Credentials"
+// @Param			2FACode		query		string			false	"User 2FA Code"
+// @Router			/login [post]
 func (uh *UserHandlers) Login(c *gin.Context) {
 	var loginPayload loginRequest
 
@@ -173,17 +182,17 @@ func (uh *UserHandlers) Login(c *gin.Context) {
 	c.JSON(http.StatusOK, payload)
 }
 
-//	@Summary		Validate User Login Token
-//	@Description	Validate User Login Token
-//	@Tags			User-Authentication
-//	@ID				validate
-//	@Accept			json
-//	@Produce		json
-//	@Failure		401	{object}	loginSampleResponseError401
-//	@Failure		500	{object}	loginSampleResponseError500
-//	@Success		200	{object}	validateSampleResponse200
-//	@Security		BearerAuth
-//	@Router			/validate [get]
+// @Summary		Validate User Login Token
+// @Description	Validate User Login Token
+// @Tags			User-Authentication
+// @ID				validate
+// @Accept			json
+// @Produce		json
+// @Failure		401	{object}	loginSampleResponseError401
+// @Failure		500	{object}	loginSampleResponseError500
+// @Success		200	{object}	validateSampleResponse200
+// @Security		BearerAuth
+// @Router			/validate [get]
 func (uh *UserHandlers) Validate(c *gin.Context) {
 	UserID, exists := c.Get("UserID")
 	if !exists {
@@ -216,18 +225,12 @@ func (uh *UserHandlers) Validate(c *gin.Context) {
 		return
 	}
 
-	permissions := func() []string {
-		var list []string
-		for _, perm := range user.Role.Permissions {
-			list = append(list, perm.ID)
-		}
-		return list
-	}
+	permissions := uh.GetPermissions(user.Role.Permissions)
 
 	// user payload
 	role := role{
 		Id:          user.Role.ID,
-		Permissions: permissions(),
+		Permissions: permissions,
 	}
 	userPayload := loginUserData{
 		Id:         user.ID,
@@ -250,19 +253,20 @@ func (uh *UserHandlers) Validate(c *gin.Context) {
 	c.JSON(http.StatusOK, payload)
 }
 
-//	@Summary		Create an Admin/Main User Account
-//	@Description	Create an Admin/Main User Account
-//	@Tags			User-Accounts
-//	@ID				signup
-//	@Accept			mpfd
-//	@Produce		json
-//	@Failure		400
-//	@Failure		500	{object}	loginSampleResponseError500
-//	@Success		201
-//	@Param			email		formData	string	true	"Email of the new user"
-//	@Param			password	formData	string	true	"Password of the new user"
-//	@Param			has2FA		formData	string	false	"Optional true or false value to set new user 2FA preference"
-//	@Router			/signup [post]
+// @Summary		Create an Admin/Main User Account
+// @Description	Create an Admin/Main User Account
+// @Tags			User-Accounts
+// @ID				signup
+// @Accept			mpfd
+// @Produce		json
+// @Failure		400
+// @Failure		500	{object}	loginSampleResponseError500
+// @Success		201
+// @Param			email		formData	string	true	"Email of the new user"
+// @Param			password	formData	string	true	"Password of the new user"
+// @Param			defaultGroupID	formData	string	true	"User's default group ID"
+// @Param			has2FA		formData	string	false	"Optional true or false value to set new user 2FA preference"
+// @Router			/signup [post]
 func (uh *UserHandlers) Signup(c *gin.Context) {
 	var user interfaces.User
 
@@ -270,35 +274,13 @@ func (uh *UserHandlers) Signup(c *gin.Context) {
 
 	case strings.Contains(c.GetHeader("Content-Type"), "application/x-www-form-urlencoded"):
 	case strings.Contains(c.GetHeader("Content-Type"), "multipart/form-data"):
-		// form, err := c.MultipartForm()
-		// if err != nil {
-		// 	c.JSON(http.StatusBadRequest, gin.H{
-		// 		"statusCode": http.StatusBadRequest,
-		// 		"status":     "error",
-		// 		"message":    "Failed to parse form",
-		// 	})
-		// 	return
-		// }
 
 		email := c.PostForm("email")
 		password := c.PostForm("password")
 		has2FAStr := c.PostForm("has2FA")
+		defaultGroupIDStr := c.PostForm("defaultGroupID")
 
-		// image := form.File["image"][0]
-		// if image != nil {
-		// 	c.SaveUploadedFile(image, fmt.Sprintf("%s/%s", uploadDir, image.Filename))
-		// }
-
-		// price, err := strconv.ParseFloat(priceStr[0], 64)
-		// if err != nil {
-		// 	c.JSON(http.StatusBadRequest, gin.H{
-		// 		"status":  "error",
-		// 		"message": "Invalid price, price must be a number",
-		// 	})
-		// 	return
-		// }
-
-		if email == "" || password == "" {
+		if email == "" || password == "" || defaultGroupIDStr == "" {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"statusCode": http.StatusBadRequest,
 				"status":     "error",
@@ -320,6 +302,16 @@ func (uh *UserHandlers) Signup(c *gin.Context) {
 			user.Has2FA = has2FA
 		}
 
+		// Parse defaultGroupID
+		defaultGroupID, err := uuid.Parse(defaultGroupIDStr)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"status":  "error",
+				"message": "Invalid value for defaultGroupID",
+			})
+			return
+		}
+
 		// Generate user password
 		bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
 		if err != nil {
@@ -335,6 +327,7 @@ func (uh *UserHandlers) Signup(c *gin.Context) {
 		user = interfaces.User{
 			Email:        email,
 			PasswordHash: passwordHash,
+			DefaultGroup: defaultGroupID,
 			RoleID:       "admin",
 			LastLogin:    time.Now(),
 		}
@@ -387,22 +380,55 @@ func (uh *UserHandlers) Signup(c *gin.Context) {
 	})
 }
 
-//	@Summary		Create a Sub-User/Member User Account
-//	@Description	Create a Sub-User/Member User Account
-//	@Tags			User-Accounts
-//	@ID				create-user
-//	@Accept			mpfd
-//	@Produce		json
-//	@Failure		400
-//	@Failure		500	{object}	loginSampleResponseError500
-//	@Success		201
-//	@Param			email		formData	string	true	"Email of the new user"
-//	@Param			password	formData	string	true	"Password of the new user"
-//	@Param			roleID		formData	string	false	"Optional Role ID string for new user. Defaults to 'member' if not specified"
-//	@Param			has2FA		formData	string	false	"Optional true or false value to set new user 2FA preference"
-//	@Router			/create-user [post]
+// @Summary		Create a Sub-User/Member User Account
+// @Description	Create a Sub-User/Member User Account - Requires the canCreateUsers permission
+// @Tags			User-Accounts
+// @ID				create-user
+// @Security		BearerAuth
+// @Accept			mpfd
+// @Produce		json
+// @Failure		400
+// @Failure		500	{object}	loginSampleResponseError500
+// @Success		201
+// @Param			email		formData	string	true	"Email of the new user"
+// @Param			password	formData	string	true	"Password of the new user"
+// @Param			roleID		formData	string	false	"Optional Role ID string for new user. Defaults to 'member' if not specified"
+// @Param			has2FA		formData	string	false	"Optional true or false value to set new user 2FA preference"
+// @Router			/users [post]
 func (uh *UserHandlers) CreateUser(c *gin.Context) {
 	var user interfaces.User
+
+	userWhoCreatesID, exists := c.Get("UserID")
+	if !exists {
+		c.JSON(http.StatusInternalServerError, loginResponse{
+			StatusCode: http.StatusInternalServerError,
+			Status:     "error",
+			Message:    "An error occured",
+		})
+		return
+	}
+
+	// validate the user against the database
+	userWhoCreates, err := uh.models.Users().GetUserByID(userWhoCreatesID.(uuid.UUID))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, loginResponse{
+			StatusCode: http.StatusInternalServerError,
+			Status:     "error",
+			Message:    "An error occured, couldn't verify user",
+		})
+		return
+	}
+
+	// Confirm User 'canListUsers'
+	permissions := uh.GetPermissions(user.Role.Permissions)
+	if !slices.Contains(permissions, "canCreateUsers") {
+		c.JSON(http.StatusUnauthorized, loginResponse{
+			StatusCode: http.StatusUnauthorized,
+			Status:     "error",
+			Message:    "User does not have the necessary permission to perfom action",
+		})
+		return
+	}
 
 	switch {
 
@@ -454,6 +480,7 @@ func (uh *UserHandlers) CreateUser(c *gin.Context) {
 		}
 		passwordHash := string(bytes)
 
+		user.DefaultGroup = userWhoCreates.DefaultGroup
 		user.Email = email
 		user.PasswordHash = passwordHash
 		user.LastLogin = time.Now()
@@ -470,7 +497,7 @@ func (uh *UserHandlers) CreateUser(c *gin.Context) {
 		return
 	}
 
-	err := uh.models.Users().CreateUser(&user)
+	err = uh.models.Users().CreateUser(&user)
 	if err != nil {
 		if strings.Contains(err.Error(), "duplicate key value") {
 			c.JSON(http.StatusBadRequest, gin.H{
@@ -495,41 +522,53 @@ func (uh *UserHandlers) CreateUser(c *gin.Context) {
 	})
 }
 
-//	@Summary		Get Users by Group ID
-//	@Description	Get Users by Group ID
-//	@Tags			Retrieve-Users
-//	@ID				users-by-groupID
-//	@Accept			json
-//	@Produce		json
-//	@Failure		400
-//	@Failure		500	{object}	loginSampleResponseError500
-//	@Success		201
-//	@Param			groupID	formData	string	true	"Group ID to filter Users By"
-//	@Router			/users/by/default-group [get]
+// @Summary		Get All Users in Group
+// @Description	Get All Users in Group - Requires the canListUsers permission
+// @Tags			User-Accounts
+// @ID				all-users-in-group
+// @Security 		BearerAuth
+// @Accept			json
+// @Produce		json
+// @Failure		400
+// @Failure		500	{object}	loginSampleResponseError500
+// @Success		201
+// @Router			/users [get]
 func (uh *UserHandlers) GetUsersByDefaultGroup(c *gin.Context) {
 
-	groupIDStr := c.Query("groupID")
-	if groupIDStr == "" {
-		c.JSON(http.StatusBadRequest, loginResponse{
-			StatusCode: http.StatusBadRequest,
+	UserID, exists := c.Get("UserID")
+	if !exists {
+		c.JSON(http.StatusInternalServerError, loginResponse{
+			StatusCode: http.StatusInternalServerError,
 			Status:     "error",
-			Message:    "Invalid Group ID",
-		})
-		return
-	}
-
-	groupID, err := uuid.Parse(groupIDStr)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, loginResponse{
-			StatusCode: http.StatusBadRequest,
-			Status:     "error",
-			Message:    "Invalid Group ID",
+			Message:    "An error occured",
 		})
 		return
 	}
 
 	// validate the user against the database
-	users, err := uh.models.Users().GetUsersByDefaultGroup(groupID)
+	user, err := uh.models.Users().GetUserByID(UserID.(uuid.UUID))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, loginResponse{
+			StatusCode: http.StatusInternalServerError,
+			Status:     "error",
+			Message:    "An error occured, couldn't verify user",
+		})
+		return
+	}
+
+	// Confirm User 'canListUsers'
+	permissions := uh.GetPermissions(user.Role.Permissions)
+	if !slices.Contains(permissions, "canListUsers") {
+		c.JSON(http.StatusUnauthorized, loginResponse{
+			StatusCode: http.StatusUnauthorized,
+			Status:     "error",
+			Message:    "User does not have the necessary permissions to perfom action",
+		})
+		return
+	}
+
+	// get the users from the database
+	users, err := uh.models.Users().GetUsersByDefaultGroup(user.DefaultGroup)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, loginResponse{
 			StatusCode: http.StatusInternalServerError,
@@ -545,5 +584,81 @@ func (uh *UserHandlers) GetUsersByDefaultGroup(c *gin.Context) {
 		"message":    "Users retrieved successfully",
 		"users":      users,
 	})
+}
 
+// @Summary		Get One User
+// @Description	Get One User in User's Group - Requires the canListUsers permission
+// @Tags			User-Accounts
+// @ID				one-user-group
+// @Security 		BearerAuth
+// @Accept			json
+// @Produce		json
+// @Failure		400
+// @Failure		401
+// @Failure		500	{object}	loginSampleResponseError500
+// @Success		201
+// @Param			userID		path	string	true	"User ID"
+// @Router			/users/{userID} [get]
+func (uh *UserHandlers) GetUserByDefaultGroup(c *gin.Context) {
+
+	UserID, exists := c.Get("UserID")
+	if !exists {
+		c.JSON(http.StatusInternalServerError, loginResponse{
+			StatusCode: http.StatusInternalServerError,
+			Status:     "error",
+			Message:    "An error occured",
+		})
+		return
+	}
+
+	userToGetStr := c.Param("userID")
+	userToGetID, err := uuid.Parse(userToGetStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, loginResponse{
+			StatusCode: http.StatusBadRequest,
+			Status:     "error",
+			Message:    "Invalid user ID",
+		})
+		return
+	}
+
+	// validate the user against the database
+	user, err := uh.models.Users().GetUserByID(UserID.(uuid.UUID))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, loginResponse{
+			StatusCode: http.StatusInternalServerError,
+			Status:     "error",
+			Message:    "An error occured, couldn't verify user",
+		})
+		return
+	}
+
+	// Confirm User 'canListUsers'
+	permissions := uh.GetPermissions(user.Role.Permissions)
+	if !slices.Contains(permissions, "canListUsers") {
+		c.JSON(http.StatusUnauthorized, loginResponse{
+			StatusCode: http.StatusUnauthorized,
+			Status:     "error",
+			Message:    "User does not have the necessary permissions to perfom action",
+		})
+		return
+	}
+
+	// get the users from the database
+	userToGet, err := uh.models.Users().GetUserByDefaultGroup(userToGetID, user.DefaultGroup)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, loginResponse{
+			StatusCode: http.StatusInternalServerError,
+			Status:     "error",
+			Message:    "An error occured while retrieving user",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"statusCode": http.StatusOK,
+		"status":     "success",
+		"message":    "User retrieved successfully",
+		"user":       userToGet,
+	})
 }

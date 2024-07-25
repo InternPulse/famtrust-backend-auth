@@ -25,18 +25,19 @@ func (app *Config) routes() *gin.Engine {
 	// Make API v1
 	v1 := api.Group("/v1")
 
-	// User Routes
+	// Auth Routes
 	v1.POST("/signup", app.Handlers.Users().Signup)
 	v1.POST("/login", app.Handlers.Users().Login)
-	v1.POST("/create-user", app.Handlers.Users().CreateUser)
 	// v1.POST("/delete-user", app.Handlers.Users().DeleteUser)
 	// v1.GET("/reset-password", app.Handlers.Users().ResetPassword)
 
 	// Get User Profile Picture
 	v1.GET("/images/profile-pic/:imageName", app.Handlers.Users().GetProfilePicture)
 
-	getUsers := v1.Group("/users/by")
-	getUsers.GET("/default-group", app.Handlers.Users().GetUsersByDefaultGroup)
+	// User Routes
+	Users := v1.Group("/users").Use(app.Handlers.AuthMiddleware())
+	Users.GET("/", app.Handlers.Users().GetUsersByDefaultGroup)
+	Users.POST("/", app.Handlers.Users().CreateUser)
 
 	// // Verification Routes
 	v1.GET("/verify-nin", app.Handlers.Verifications().VerifyNIN)

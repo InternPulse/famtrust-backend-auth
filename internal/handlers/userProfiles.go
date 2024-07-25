@@ -78,7 +78,6 @@ func (uh *UserHandlers) GetUserProfileByID(c *gin.Context) {
 // @Param			bio				formData	string	true	"User's biography"
 // @Param			nin				formData	int		false	"User's National Identification Number"
 // @Param			bvn				formData	int		false	"User's Bank Verification Number"
-// @Param			defaultGroupID	formData	string	true	"User's default group ID"
 // @Param			profilePicture	formData	file	true	"User's profile picture"
 // @Router			/profile/create [post]
 func (uh *UserHandlers) CreateUserProfile(c *gin.Context) {
@@ -105,9 +104,8 @@ func (uh *UserHandlers) CreateUserProfile(c *gin.Context) {
 		bio := c.PostForm("bio")
 		ninStr := c.PostForm("nin")
 		bvnStr := c.PostForm("bvn")
-		defaultGroupIDStr := c.PostForm("defaultGroupID")
 
-		if firstName == "" || lastName == "" || bio == "" || defaultGroupIDStr == "" {
+		if firstName == "" || lastName == "" || bio == "" {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"statusCode": http.StatusBadRequest,
 				"status":     "error",
@@ -140,16 +138,6 @@ func (uh *UserHandlers) CreateUserProfile(c *gin.Context) {
 				return
 			}
 			profile.BVN = uint(bvn)
-		}
-
-		// Parse defaultGroupID
-		defaultGroupID, err := uuid.Parse(defaultGroupIDStr)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"status":  "error",
-				"message": "Invalid value for defaultGroupID",
-			})
-			return
 		}
 
 		// Get profile picture
@@ -189,7 +177,6 @@ func (uh *UserHandlers) CreateUserProfile(c *gin.Context) {
 		profile.FirstName = firstName
 		profile.LastName = lastName
 		profile.Bio = bio
-		profile.DefaultGroup = defaultGroupID
 		profile.ProfilePictureUrl = dstURL
 
 	default:
@@ -241,7 +228,6 @@ func (uh *UserHandlers) CreateUserProfile(c *gin.Context) {
 // @Param			bio				formData	string	false	"User's biography"
 // @Param			nin				formData	int		false	"User's National Identification Number"
 // @Param			bvn				formData	int		false	"User's Bank Verification Number"
-// @Param			defaultGroupID	formData	string	false	"User's default group ID"
 // @Param			profilePicture	formData	file	false	"User's profile picture"
 // @Router			/profile/update [put]
 func (uh *UserHandlers) UpdateUserProfile(c *gin.Context) {
@@ -268,7 +254,6 @@ func (uh *UserHandlers) UpdateUserProfile(c *gin.Context) {
 		bio := c.PostForm("bio")
 		ninStr := c.PostForm("nin")
 		bvnStr := c.PostForm("bvn")
-		defaultGroupIDStr := c.PostForm("defaultGroupID")
 
 		if firstName != "" {
 			profile.FirstName = firstName
@@ -306,19 +291,6 @@ func (uh *UserHandlers) UpdateUserProfile(c *gin.Context) {
 				return
 			}
 			profile.BVN = uint(bvn)
-		}
-
-		// Parse defaultGroupID
-		if defaultGroupIDStr != "" {
-			defaultGroupID, err := uuid.Parse(defaultGroupIDStr)
-			if err != nil {
-				c.JSON(http.StatusBadRequest, gin.H{
-					"status":  "error",
-					"message": "Invalid value for defaultGroupID",
-				})
-				return
-			}
-			profile.DefaultGroup = defaultGroupID
 		}
 
 		// Check if a profile picture was submitted

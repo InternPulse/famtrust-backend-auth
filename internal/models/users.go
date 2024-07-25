@@ -123,3 +123,17 @@ func (u *UserModels) GetUsersByDefaultGroup(groupID uuid.UUID) (*[]interfaces.Us
 	}
 	return &users, nil
 }
+
+func (u *UserModels) GetUserByDefaultGroup(userID uuid.UUID, groupID uuid.UUID) (*interfaces.User, error) {
+	var user interfaces.User
+	if err := u.DB.Preload("UserProfile").
+		Joins("UserProfile").
+		Where("id = ?", userID).
+		Where(`"UserProfile".default_group = ?`, groupID).
+		Omit("password_hash").
+		First(&user).Error; err != nil {
+
+		return nil, err
+	}
+	return &user, nil
+}

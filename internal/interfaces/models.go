@@ -28,6 +28,7 @@ type UserModels interface {
 	GetUserByNIN(nin int) (*User, error)
 	SetIsVerified(userID uuid.UUID, value bool) error
 	GetUsersByDefaultGroup(groupID uuid.UUID) (*[]User, error)
+	GetUserByDefaultGroup(userID uuid.UUID, groupID uuid.UUID) (*User, error)
 }
 
 type UserRoles interface {
@@ -75,6 +76,7 @@ type User struct {
 	Email        string      `json:"email" gorm:"not null;unique"`
 	PasswordHash string      `json:"_" gorm:"not null"`
 	RoleID       string      `json:"roleId" gorm:"not null"`
+	DefaultGroup uuid.UUID   `json:"defaultGroup"`
 	Has2FA       bool        `json:"has2FA" gorm:"column:has_2fa;not null"`
 	IsVerified   bool        `json:"isVerified" gorm:"not null"`
 	IsFreezed    bool        `json:"isFreezed" gorm:"not null"`

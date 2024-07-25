@@ -15,64 +15,6 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/create-user": {
-            "post": {
-                "description": "Create a Sub-User/Member User Account",
-                "consumes": [
-                    "multipart/form-data"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "User-Accounts"
-                ],
-                "summary": "Create a Sub-User/Member User Account",
-                "operationId": "create-user",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Email of the new user",
-                        "name": "email",
-                        "in": "formData",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Password of the new user",
-                        "name": "password",
-                        "in": "formData",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Optional Role ID string for new user. Defaults to 'member' if not specified",
-                        "name": "roleID",
-                        "in": "formData"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Optional true or false value to set new user 2FA preference",
-                        "name": "has2FA",
-                        "in": "formData"
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created"
-                    },
-                    "400": {
-                        "description": "Bad Request"
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/handlers.loginSampleResponseError500"
-                        }
-                    }
-                }
-            }
-        },
         "/images/profile-pic/{imageName}": {
             "get": {
                 "description": "Get User Profile Picture",
@@ -251,13 +193,6 @@ const docTemplate = `{
                         "in": "formData"
                     },
                     {
-                        "type": "string",
-                        "description": "User's default group ID",
-                        "name": "defaultGroupID",
-                        "in": "formData",
-                        "required": true
-                    },
-                    {
                         "type": "file",
                         "description": "User's profile picture",
                         "name": "profilePicture",
@@ -319,12 +254,6 @@ const docTemplate = `{
                         "in": "formData"
                     },
                     {
-                        "type": "string",
-                        "description": "User's default group ID",
-                        "name": "defaultGroupID",
-                        "in": "formData"
-                    },
-                    {
                         "type": "file",
                         "description": "User's profile picture",
                         "name": "profilePicture",
@@ -365,6 +294,13 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
+                        "description": "User's default group ID",
+                        "name": "defaultGroupID",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "Optional true or false value to set new user 2FA preference",
                         "name": "has2FA",
                         "in": "formData"
@@ -386,9 +322,14 @@ const docTemplate = `{
                 }
             }
         },
-        "/users/by/default-group": {
+        "/users": {
             "get": {
-                "description": "Get Users by Group ID",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get All Users in Group - Requires the canListUsers permission",
                 "consumes": [
                     "application/json"
                 ],
@@ -396,16 +337,112 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Retrieve-Users"
+                    "User-Accounts"
                 ],
-                "summary": "Get Users by Group ID",
-                "operationId": "users-by-groupID",
+                "summary": "Get All Users in Group",
+                "operationId": "all-users-in-group",
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.loginSampleResponseError500"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Create a Sub-User/Member User Account - Requires the canCreateUsers permission",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User-Accounts"
+                ],
+                "summary": "Create a Sub-User/Member User Account",
+                "operationId": "create-user",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Group ID to filter Users By",
-                        "name": "groupID",
+                        "description": "Email of the new user",
+                        "name": "email",
                         "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Password of the new user",
+                        "name": "password",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Optional Role ID string for new user. Defaults to 'member' if not specified",
+                        "name": "roleID",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Optional true or false value to set new user 2FA preference",
+                        "name": "has2FA",
+                        "in": "formData"
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.loginSampleResponseError500"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/{userID}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get One User in User's Group - Requires the canListUsers permission",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User-Accounts"
+                ],
+                "summary": "Get One User",
+                "operationId": "one-user-group",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "userID",
+                        "in": "path",
                         "required": true
                     }
                 ],
@@ -415,6 +452,9 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
                     },
                     "500": {
                         "description": "Internal Server Error",

@@ -13,6 +13,7 @@ type UserHandlers interface {
 	CreateUser(c *gin.Context)
 	Login(c *gin.Context)
 	Validate(c *gin.Context)
+	GetPermissions(permissions []Permission) []string
 	// ResetPassword(c *gin.Context)
 
 	// User Profiles
@@ -23,6 +24,7 @@ type UserHandlers interface {
 
 	// Get Users By...
 	GetUsersByDefaultGroup(c *gin.Context)
+	GetUserByDefaultGroup(c *gin.Context)
 }
 
 type VerificationHandlers interface {
