@@ -11,7 +11,7 @@ services:
     ports:
       - "8001:8001"
     volumes:
-      - ./data/auth-app/images:/app/images
+      - ./data/auth-app/images:/images
 
   postgres:
     image: 'postgres:latest'
