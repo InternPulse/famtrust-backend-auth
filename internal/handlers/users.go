@@ -420,7 +420,7 @@ func (uh *UserHandlers) CreateUser(c *gin.Context) {
 	}
 
 	// Confirm User 'canListUsers'
-	permissions := uh.GetPermissions(user.Role.Permissions)
+	permissions := uh.GetPermissions(userWhoCreates.Role.Permissions)
 	if !slices.Contains(permissions, "canCreateUsers") {
 		c.JSON(http.StatusUnauthorized, loginResponse{
 			StatusCode: http.StatusUnauthorized,
