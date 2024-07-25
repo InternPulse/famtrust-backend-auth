@@ -38,6 +38,7 @@ func (app *Config) routes() *gin.Engine {
 	Users := v1.Group("/users").Use(app.Handlers.AuthMiddleware())
 	Users.GET("/", app.Handlers.Users().GetUsersByDefaultGroup)
 	Users.POST("/", app.Handlers.Users().CreateUser)
+	Users.GET("/:userID", app.Handlers.Users().GetUserByDefaultGroup)
 
 	// // Verification Routes
 	v1.GET("/verify-nin", app.Handlers.Verifications().VerifyNIN)
