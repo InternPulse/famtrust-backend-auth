@@ -37,7 +37,7 @@ func (u *UserModels) GetUserByEmail(email string) (*interfaces.User, error) {
 }
 
 func (u *UserModels) UpdateUser(user *interfaces.User) error {
-	if err := u.DB.Model(&interfaces.User{}).Updates(&user).Error; err != nil {
+	if err := u.DB.Model(&interfaces.User{}).Where("id = ?", user.ID).Updates(&user).Error; err != nil {
 		return err
 	}
 	return nil

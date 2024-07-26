@@ -27,13 +27,14 @@ type loginResponse struct {
 }
 
 type loginUserData struct {
-	Id         uuid.UUID `json:"id"`
-	Email      string    `json:"email"`
-	Role       role      `json:"role"`
-	Has2FA     bool      `json:"has2FA"`
-	IsVerified bool      `json:"isVerified"`
-	IsFreezed  bool      `json:"isFreezed"`
-	LastLogin  time.Time `json:"lastLogin"`
+	Id           uuid.UUID `json:"id"`
+	Email        string    `json:"email"`
+	Role         role      `json:"role"`
+	DefaultGroup uuid.UUID `json:"defaultGroup"`
+	Has2FA       bool      `json:"has2FA"`
+	IsVerified   bool      `json:"isVerified"`
+	IsFreezed    bool      `json:"isFreezed"`
+	LastLogin    time.Time `json:"lastLogin"`
 }
 
 type role struct {

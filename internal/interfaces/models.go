@@ -91,9 +91,8 @@ type UserProfile struct {
 	FirstName         string    `json:"firstName" gorm:"not null"`
 	LastName          string    `json:"lastName" gorm:"not null"`
 	Bio               string    `json:"bio" gorm:"not null"`
-	DefaultGroup      uuid.UUID `json:"defaultGroup"`
-	NIN               uint      `json:"nin" gorm:"unique"`
-	BVN               uint      `json:"bvn" gorm:"unique"`
+	NIN               uint      `json:"nin" gorm:"not null"`
+	BVN               uint      `json:"bvn" gorm:"not null"`
 	ProfilePictureUrl string    `json:"profilePictureUrl" gorm:"not null"`
 }
 

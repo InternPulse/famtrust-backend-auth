@@ -276,6 +276,14 @@ paths:
         name: profilePicture
         required: true
         type: file
+      - description: New User's default family group Name
+        in: formData
+        name: familyGroupName
+        type: string
+      - description: New User's default family group Description
+        in: formData
+        name: familyGroupDescription
+        type: string
       produces:
       - application/json
       responses: {}
@@ -338,11 +346,6 @@ paths:
       - description: Password of the new user
         in: formData
         name: password
-        required: true
-        type: string
-      - description: User's default group ID
-        in: formData
-        name: defaultGroupID
         required: true
         type: string
       - description: Optional true or false value to set new user 2FA preference

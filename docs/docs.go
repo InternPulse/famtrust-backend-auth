@@ -198,6 +198,18 @@ const docTemplate = `{
                         "name": "profilePicture",
                         "in": "formData",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "New User's default family group Name",
+                        "name": "familyGroupName",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "New User's default family group Description",
+                        "name": "familyGroupDescription",
+                        "in": "formData"
                     }
                 ],
                 "responses": {}
@@ -289,13 +301,6 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Password of the new user",
                         "name": "password",
-                        "in": "formData",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "User's default group ID",
-                        "name": "defaultGroupID",
                         "in": "formData",
                         "required": true
                     },

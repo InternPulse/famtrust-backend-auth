@@ -233,13 +233,14 @@ func (uh *UserHandlers) Validate(c *gin.Context) {
 		Permissions: permissions,
 	}
 	userPayload := loginUserData{
-		Id:         user.ID,
-		Email:      user.Email,
-		Has2FA:     user.Has2FA,
-		IsVerified: user.IsVerified,
-		IsFreezed:  user.IsFreezed,
-		LastLogin:  user.LastLogin,
-		Role:       role,
+		Id:           user.ID,
+		Email:        user.Email,
+		Has2FA:       user.Has2FA,
+		DefaultGroup: user.DefaultGroup,
+		IsVerified:   user.IsVerified,
+		IsFreezed:    user.IsFreezed,
+		LastLogin:    user.LastLogin,
+		Role:         role,
 	}
 
 	payload := verifyResponse{
@@ -264,7 +265,6 @@ func (uh *UserHandlers) Validate(c *gin.Context) {
 // @Success		201
 // @Param			email		formData	string	true	"Email of the new user"
 // @Param			password	formData	string	true	"Password of the new user"
-// @Param			defaultGroupID	formData	string	true	"User's default group ID"
 // @Param			has2FA		formData	string	false	"Optional true or false value to set new user 2FA preference"
 // @Router			/signup [post]
 func (uh *UserHandlers) Signup(c *gin.Context) {
@@ -278,9 +278,8 @@ func (uh *UserHandlers) Signup(c *gin.Context) {
 		email := c.PostForm("email")
 		password := c.PostForm("password")
 		has2FAStr := c.PostForm("has2FA")
-		defaultGroupIDStr := c.PostForm("defaultGroupID")
 
-		if email == "" || password == "" || defaultGroupIDStr == "" {
+		if email == "" || password == "" {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"statusCode": http.StatusBadRequest,
 				"status":     "error",
@@ -302,16 +301,6 @@ func (uh *UserHandlers) Signup(c *gin.Context) {
 			user.Has2FA = has2FA
 		}
 
-		// Parse defaultGroupID
-		defaultGroupID, err := uuid.Parse(defaultGroupIDStr)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"status":  "error",
-				"message": "Invalid value for defaultGroupID",
-			})
-			return
-		}
-
 		// Generate user password
 		bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
 		if err != nil {
@@ -324,13 +313,11 @@ func (uh *UserHandlers) Signup(c *gin.Context) {
 		}
 		passwordHash := string(bytes)
 
-		user = interfaces.User{
-			Email:        email,
-			PasswordHash: passwordHash,
-			DefaultGroup: defaultGroupID,
-			RoleID:       "admin",
-			LastLogin:    time.Now(),
-		}
+		user.Email = email
+		user.PasswordHash = passwordHash
+		// Set admin as default role ID for user created via /signup
+		user.RoleID = "admin"
+		user.LastLogin = time.Now()
 
 	default:
 		c.JSON(http.StatusBadRequest, gin.H{

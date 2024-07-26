@@ -1,7 +1,10 @@
 package handlers
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -79,6 +82,8 @@ func (uh *UserHandlers) GetUserProfileByID(c *gin.Context) {
 // @Param			nin				formData	int		false	"User's National Identification Number"
 // @Param			bvn				formData	int		false	"User's Bank Verification Number"
 // @Param			profilePicture	formData	file	true	"User's profile picture"
+// @Param			familyGroupName	formData	string	false	"New User's default family group Name"
+// @Param			familyGroupDescription	formData	string	false	"New User's default family group Description"
 // @Router			/profile/create [post]
 func (uh *UserHandlers) CreateUserProfile(c *gin.Context) {
 
@@ -99,11 +104,144 @@ func (uh *UserHandlers) CreateUserProfile(c *gin.Context) {
 			return
 		}
 
+		user, err := uh.models.Users().GetUserByID(UserID.(uuid.UUID))
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, loginResponse{
+				StatusCode: http.StatusInternalServerError,
+				Status:     "error",
+				Message:    "An error occured",
+			})
+			return
+		}
+
+		token, exists := c.Get("token")
+		if !exists {
+			c.JSON(http.StatusInternalServerError, loginResponse{
+				StatusCode: http.StatusInternalServerError,
+				Status:     "error",
+				Message:    "An error occured, failed to retrieve token",
+			})
+			return
+		}
+
 		firstName := c.PostForm("firstName")
 		lastName := c.PostForm("lastName")
 		bio := c.PostForm("bio")
 		ninStr := c.PostForm("nin")
 		bvnStr := c.PostForm("bvn")
+
+		familyGroupName := c.PostForm("familyGroupName")
+		familyGroupDescription := c.PostForm("familyGroupDescription")
+
+		if user.Role.ID == "admin" && (familyGroupName == "" || familyGroupDescription == "") {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"statusCode": http.StatusBadRequest,
+				"status":     "error",
+				"message":    "New user must create a new Default Family Group. Group name and description are required",
+			})
+			return
+
+		} else if user.Role.ID == "admin" && (familyGroupName != "" || familyGroupDescription != "") {
+			// Call the family groups endpoint, create a new default group
+			url := "https://core.famtrust.biz/api/v1/family-groups"
+			familyGroup := gin.H{
+				"name":        familyGroupName,
+				"description": familyGroupDescription,
+				"is_default":  true,
+			}
+
+			familyGroupJSON, err := json.Marshal(familyGroup)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, loginResponse{
+					StatusCode: http.StatusInternalServerError,
+					Status:     "error",
+					Message:    "Failed to parse family group info into JSON",
+				})
+				return
+			}
+
+			req, err := http.NewRequest("POST", url, bytes.NewBuffer(familyGroupJSON))
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, loginResponse{
+					StatusCode: http.StatusInternalServerError,
+					Status:     "error",
+					Message:    "Failed to create a default family group for user, cannot proceed without",
+				})
+				return
+			}
+
+			// Add headers
+			req.Header.Add("Content-Type", "application/json")
+			req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token.(string)))
+
+			client := &http.Client{}
+			resp, err := client.Do(req)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, loginResponse{
+					StatusCode: http.StatusInternalServerError,
+					Status:     "error",
+					Message:    "Failed to create a default family group for user, cannot proceed without",
+				})
+				return
+			}
+			defer resp.Body.Close()
+
+			var familyGroupResp struct {
+				FamilyGroup struct {
+					ID string `json:"id"`
+				} `json:"family_group"`
+			}
+
+			if resp.StatusCode == 201 {
+				body, err := io.ReadAll(resp.Body)
+				if err != nil {
+					c.JSON(http.StatusInternalServerError, loginResponse{
+						StatusCode: http.StatusInternalServerError,
+						Status:     "error",
+						Message:    "Failed to create a default family group for user, cannot proceed without",
+					})
+					return
+				}
+
+				err = json.Unmarshal(body, &familyGroupResp)
+				if err != nil {
+					c.JSON(http.StatusInternalServerError, loginResponse{
+						StatusCode: http.StatusInternalServerError,
+						Status:     "error",
+						Message:    "Failed to create a default family group for user, cannot proceed without",
+					})
+					return
+				}
+
+				groupID, err := uuid.Parse(familyGroupResp.FamilyGroup.ID)
+				if err != nil {
+					c.JSON(http.StatusInternalServerError, loginResponse{
+						StatusCode: http.StatusInternalServerError,
+						Status:     "error",
+						Message:    fmt.Sprintf("Failed to parse new family group ID, aborting without: %v", err),
+					})
+					return
+				}
+
+				user.DefaultGroup = groupID
+				err = uh.models.Users().UpdateUser(user)
+				if err != nil {
+					c.JSON(http.StatusInternalServerError, loginResponse{
+						StatusCode: http.StatusInternalServerError,
+						Status:     "error",
+						Message:    "Failed to update user with new family group ID, aborting without",
+					})
+					return
+				}
+			} else {
+				c.JSON(http.StatusInternalServerError, loginResponse{
+					StatusCode: http.StatusInternalServerError,
+					Status:     "error",
+					Message:    "Error response from family group service. Failed to create user default family group",
+				})
+				return
+			}
+		}
 
 		if firstName == "" || lastName == "" || bio == "" {
 			c.JSON(http.StatusBadRequest, gin.H{
