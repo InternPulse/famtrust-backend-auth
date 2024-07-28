@@ -113,7 +113,9 @@ func (u *UserModels) SetIsVerified(userID uuid.UUID, value bool) error {
 
 func (u *UserModels) GetUsersByDefaultGroup(groupID uuid.UUID) (*[]interfaces.User, error) {
 	var users []interfaces.User
-	if err := u.DB.Preload("UserProfile").
+	if err := u.DB.Preload("Role").
+		Preload("Role.Permissions").
+		Preload("UserProfile").
 		Where("default_group = ?", groupID).
 		Omit("password_hash").
 		Find(&users).Error; err != nil {
@@ -125,7 +127,9 @@ func (u *UserModels) GetUsersByDefaultGroup(groupID uuid.UUID) (*[]interfaces.Us
 
 func (u *UserModels) GetUserByDefaultGroup(userID uuid.UUID, groupID uuid.UUID) (*interfaces.User, error) {
 	var user interfaces.User
-	if err := u.DB.Preload("UserProfile").
+	if err := u.DB.Preload("Role").
+		Preload("Role.Permissions").
+		Preload("UserProfile").
 		Where("id = ?", userID).
 		Where("default_group = ?", groupID).
 		Omit("password_hash").
