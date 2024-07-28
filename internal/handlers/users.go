@@ -584,8 +584,10 @@ func (uh *UserHandlers) GetUsersByDefaultGroup(c *gin.Context) {
 // @Failure		401
 // @Failure		500	{object}	loginSampleResponseError500
 // @Success		201
-// @Param			userID		path	string	true	"User ID"
-// @Router			/users/{userID} [get]
+// @Param			email		query	string	false	"User Email"
+// @Param			code		query	string	false	"Password reset code"
+// @Param			newPassword		formData	string	false	"New user password"
+// @Router			/reset-password [get]
 func (uh *UserHandlers) GetUserByDefaultGroup(c *gin.Context) {
 
 	UserID, exists := c.Get("UserID")
@@ -647,5 +649,166 @@ func (uh *UserHandlers) GetUserByDefaultGroup(c *gin.Context) {
 		"status":     "success",
 		"message":    "User retrieved successfully",
 		"user":       userToGet,
+	})
+}
+
+func (uh *UserHandlers) ResetPassword(c *gin.Context) {
+	resetCodeStr := c.Query("code")
+	email := c.Query("email")
+	newPass := c.PostForm("newPassword")
+
+	if resetCodeStr == "" {
+		if email == "" {
+			c.JSON(http.StatusBadRequest, loginResponse{
+				StatusCode: http.StatusBadRequest,
+				Status:     "error",
+				Message:    "User email or password reset code not provided",
+			})
+			return
+		} else {
+			user, err := uh.models.Users().GetUserByEmail("")
+			if err != nil {
+				c.JSON(http.StatusOK, loginResponse{
+					StatusCode: http.StatusOK,
+					Status:     "success",
+					Message:    "Passord reset link sent if user exists",
+				})
+				return
+			}
+
+			resetCode := interfaces.VerCode{
+				UserID: user.ID,
+				Type:   "password",
+			}
+
+			err = uh.models.VerCodes().CreateVerificationCode(&resetCode)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, loginResponse{
+					StatusCode: http.StatusInternalServerError,
+					Status:     "error",
+					Message:    "Failed to create user password reset link",
+				})
+				return
+			}
+
+			resetLink := "https://" + c.Request.Host + c.Request.URL.Path + "/reset-password/reset" + "?code=" + resetCode.ID.String()
+
+			// Send as email
+			verEmail := interfaces.EmailMsg{
+				Subject: "Reset your password",
+				From:    "FamTrust <biz@famtrust.biz>",
+				To:      user.Email,
+				BodyText: fmt.Sprintf("Hello there! \n"+
+					"You've requested a password reset link for your FamTrust account. \n"+
+					"Click on the link below to reset your password. \n\n\n"+
+					"\"%s\"", resetLink),
+			}
+
+			if err = uh.mailer.SendMail(&verEmail); err != nil {
+				c.JSON(http.StatusInternalServerError, loginResponse{
+					StatusCode: http.StatusInternalServerError,
+					Status:     "error",
+					Message:    "Failed to send user password reset link",
+				})
+				return
+
+			} else {
+				c.JSON(http.StatusOK, loginResponse{
+					StatusCode: http.StatusOK,
+					Status:     "success",
+					Message:    "Passord reset link sent if user exists",
+				})
+				return
+			}
+		}
+	} else {
+		if newPass == "" {
+			c.JSON(http.StatusBadRequest, loginResponse{
+				StatusCode: http.StatusBadRequest,
+				Status:     "error",
+				Message:    "No new password specified",
+			})
+			return
+		}
+
+		switch {
+
+		case strings.Contains(c.GetHeader("Content-Type"), "application/x-www-form-urlencoded"):
+		case strings.Contains(c.GetHeader("Content-Type"), "multipart/form-data"):
+		default:
+			c.JSON(http.StatusBadRequest, gin.H{
+				"statusCode": http.StatusBadRequest,
+				"status":     "error",
+				"message":    "Invalid data. Submit valid form-data",
+				"error": gin.H{
+					"error": fmt.Sprintf("You made use of a :%s: header", c.GetHeader("Content-Type")),
+				},
+			})
+			return
+		}
+
+		resetCode, err := uuid.Parse(resetCodeStr)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, loginResponse{
+				StatusCode: http.StatusBadRequest,
+				Status:     "error",
+				Message:    "Invalid reset token",
+			})
+			return
+		}
+
+		code, err := uh.models.VerCodes().GetResetCodeByID(resetCode)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, loginResponse{
+				StatusCode: http.StatusBadRequest,
+				Status:     "error",
+				Message:    "Invalid reset token",
+			})
+			return
+		}
+
+		// Generate new user password
+		bytes, err := bcrypt.GenerateFromPassword([]byte(newPass), 14)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"statusCode": http.StatusInternalServerError,
+				"status":     "error",
+				"message":    "Error parsing new user password",
+			})
+			return
+		}
+		passwordHash := string(bytes)
+
+		user, err := uh.models.Users().GetUserByID(code.UserID)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"statusCode": http.StatusInternalServerError,
+				"status":     "error",
+				"message":    "Error retrieving user",
+			})
+			return
+		}
+
+		user.PasswordHash = passwordHash
+
+		err = uh.models.Users().UpdateUser(user)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"statusCode": http.StatusInternalServerError,
+				"status":     "error",
+				"message":    "Error updating user with new password",
+			})
+			return
+		}
+
+		if err := uh.models.VerCodes().DeleteResetCodeByUserID(code.UserID); err != nil {
+			log.Printf("Failed to delete Email verification code: %v", err)
+		}
+	}
+
+	c.JSON(http.StatusOK, loginResponse{
+		StatusCode: http.StatusOK,
+		Status:     "success",
+		Message:    "Password successfully updated",
 	})
 }

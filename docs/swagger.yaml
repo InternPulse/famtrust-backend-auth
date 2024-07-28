@@ -331,6 +331,43 @@ paths:
       summary: Update User Profile
       tags:
       - User-Profiles
+  /reset-password:
+    get:
+      consumes:
+      - application/json
+      description: Get One User in User's Group - Requires the canListUsers permission
+      operationId: one-user-group
+      parameters:
+      - description: User Email
+        in: query
+        name: email
+        type: string
+      - description: Password reset code
+        in: query
+        name: code
+        type: string
+      - description: New user password
+        in: formData
+        name: newPassword
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.loginSampleResponseError500'
+      security:
+      - BearerAuth: []
+      summary: Get One User
+      tags:
+      - User-Accounts
   /signup:
     post:
       consumes:
@@ -428,36 +465,6 @@ paths:
       security:
       - BearerAuth: []
       summary: Create a Sub-User/Member User Account
-      tags:
-      - User-Accounts
-  /users/{userID}:
-    get:
-      consumes:
-      - application/json
-      description: Get One User in User's Group - Requires the canListUsers permission
-      operationId: one-user-group
-      parameters:
-      - description: User ID
-        in: path
-        name: userID
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-        "400":
-          description: Bad Request
-        "401":
-          description: Unauthorized
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/handlers.loginSampleResponseError500'
-      security:
-      - BearerAuth: []
-      summary: Get One User
       tags:
       - User-Accounts
   /validate:

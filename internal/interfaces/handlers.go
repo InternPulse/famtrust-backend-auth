@@ -14,7 +14,7 @@ type UserHandlers interface {
 	Login(c *gin.Context)
 	Validate(c *gin.Context)
 	GetPermissions(permissions []Permission) []string
-	// ResetPassword(c *gin.Context)
+	ResetPassword(c *gin.Context)
 
 	// User Profiles
 	GetUserProfileByID(c *gin.Context)

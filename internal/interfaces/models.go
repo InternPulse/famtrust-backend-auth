@@ -49,10 +49,12 @@ type UserPermissions interface {
 
 type VerCodeModels interface {
 	CreateVerificationCode(verCode *VerCode) error
-	GetEmailCodeByUserID(codeID uuid.UUID) (*VerCode, error)
+	GetEmailCodeByID(codeID uuid.UUID) (*VerCode, error)
 	Get2FACodeByUserID(codeID uuid.UUID) (*VerCode, error)
-	DeleteEmailCodeByUserID(codeID uuid.UUID) error
-	Delete2FACodeByUserID(codeID uuid.UUID) error
+	GetResetCodeByID(codeID uuid.UUID) (*VerCode, error)
+	DeleteEmailCodeByUserID(userID uuid.UUID) error
+	DeleteResetCodeByUserID(userID uuid.UUID) error
+	Delete2FACodeByUserID(userID uuid.UUID) error
 }
 
 // Create uuid model.
@@ -112,7 +114,7 @@ type Permission struct {
 	Roles     []Role         `gorm:"many2many:role_permissions;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 }
 
-// VerCode Type can either be 'email' or '2fa'
+// VerCode Type can either be 'email' or '2fa' or 'password'
 // TODO: Implement enums
 type VerCode struct {
 	UUIDModel

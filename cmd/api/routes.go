@@ -29,7 +29,7 @@ func (app *Config) routes() *gin.Engine {
 	v1.POST("/signup", app.Handlers.Users().Signup)
 	v1.POST("/login", app.Handlers.Users().Login)
 	// v1.POST("/delete-user", app.Handlers.Users().DeleteUser)
-	// v1.GET("/reset-password", app.Handlers.Users().ResetPassword)
+	v1.GET("/reset-password", app.Handlers.Users().ResetPassword)
 
 	// Get User Profile Picture
 	v1.GET("/images/profile-pic/:imageName", app.Handlers.Users().GetProfilePicture)
