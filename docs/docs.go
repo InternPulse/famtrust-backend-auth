@@ -276,13 +276,13 @@ const docTemplate = `{
             }
         },
         "/reset-password": {
-            "get": {
+            "post": {
                 "security": [
                     {
                         "BearerAuth": []
                     }
                 ],
-                "description": "Get One User in User's Group - Requires the canListUsers permission",
+                "description": "Reset User Password",
                 "consumes": [
                     "application/json"
                 ],
@@ -292,8 +292,8 @@ const docTemplate = `{
                 "tags": [
                     "User-Accounts"
                 ],
-                "summary": "Get One User",
-                "operationId": "one-user-group",
+                "summary": "Reset User Password",
+                "operationId": "reset-password",
                 "parameters": [
                     {
                         "type": "string",
@@ -315,14 +315,11 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "201": {
-                        "description": "Created"
+                    "200": {
+                        "description": "OK"
                     },
                     "400": {
                         "description": "Bad Request"
-                    },
-                    "401": {
-                        "description": "Unauthorized"
                     },
                     "500": {
                         "description": "Internal Server Error",
@@ -471,6 +468,53 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request"
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.loginSampleResponseError500"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/{userID}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get One User in User's Group - Requires the canListUsers permission",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User-Accounts"
+                ],
+                "summary": "Get One User",
+                "operationId": "one-user-group",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "userID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
                     },
                     "500": {
                         "description": "Internal Server Error",

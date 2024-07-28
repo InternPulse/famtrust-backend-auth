@@ -584,10 +584,8 @@ func (uh *UserHandlers) GetUsersByDefaultGroup(c *gin.Context) {
 // @Failure		401
 // @Failure		500	{object}	loginSampleResponseError500
 // @Success		201
-// @Param			email		query	string	false	"User Email"
-// @Param			code		query	string	false	"Password reset code"
-// @Param			newPassword		formData	string	false	"New user password"
-// @Router			/reset-password [get]
+// @Param			userID		path	string	true	"User ID"
+// @Router			/users/{userID} [get]
 func (uh *UserHandlers) GetUserByDefaultGroup(c *gin.Context) {
 
 	UserID, exists := c.Get("UserID")
@@ -652,6 +650,20 @@ func (uh *UserHandlers) GetUserByDefaultGroup(c *gin.Context) {
 	})
 }
 
+// @Summary		Reset User Password
+// @Description	Reset User Password
+// @Tags			User-Accounts
+// @ID				reset-password
+// @Security 		BearerAuth
+// @Accept			json
+// @Produce		json
+// @Failure		400
+// @Failure		500	{object}	loginSampleResponseError500
+// @Success		200
+// @Param			email		query	string	false	"User Email"
+// @Param			code		query	string	false	"Password reset code"
+// @Param			newPassword		formData	string	false	"New user password"
+// @Router			/reset-password [post]
 func (uh *UserHandlers) ResetPassword(c *gin.Context) {
 	resetCodeStr := c.Query("code")
 	email := c.Query("email")

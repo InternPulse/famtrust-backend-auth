@@ -332,11 +332,11 @@ paths:
       tags:
       - User-Profiles
   /reset-password:
-    get:
+    post:
       consumes:
       - application/json
-      description: Get One User in User's Group - Requires the canListUsers permission
-      operationId: one-user-group
+      description: Reset User Password
+      operationId: reset-password
       parameters:
       - description: User Email
         in: query
@@ -353,19 +353,17 @@ paths:
       produces:
       - application/json
       responses:
-        "201":
-          description: Created
+        "200":
+          description: OK
         "400":
           description: Bad Request
-        "401":
-          description: Unauthorized
         "500":
           description: Internal Server Error
           schema:
             $ref: '#/definitions/handlers.loginSampleResponseError500'
       security:
       - BearerAuth: []
-      summary: Get One User
+      summary: Reset User Password
       tags:
       - User-Accounts
   /signup:
@@ -465,6 +463,36 @@ paths:
       security:
       - BearerAuth: []
       summary: Create a Sub-User/Member User Account
+      tags:
+      - User-Accounts
+  /users/{userID}:
+    get:
+      consumes:
+      - application/json
+      description: Get One User in User's Group - Requires the canListUsers permission
+      operationId: one-user-group
+      parameters:
+      - description: User ID
+        in: path
+        name: userID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.loginSampleResponseError500'
+      security:
+      - BearerAuth: []
+      summary: Get One User
       tags:
       - User-Accounts
   /validate:
