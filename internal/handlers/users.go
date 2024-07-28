@@ -238,7 +238,7 @@ func (uh *UserHandlers) Validate(c *gin.Context) {
 		Has2FA:       user.Has2FA,
 		DefaultGroup: user.DefaultGroup,
 		IsVerified:   user.IsVerified,
-		IsFreezed:    user.IsFreezed,
+		IsFreezed:    user.IsFrozen,
 		LastLogin:    user.LastLogin,
 		Role:         role,
 	}
