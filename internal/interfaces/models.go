@@ -81,7 +81,7 @@ type User struct {
 	DefaultGroup uuid.UUID   `json:"defaultGroup"`
 	Has2FA       bool        `json:"has2FA" gorm:"column:has_2fa;not null"`
 	IsVerified   bool        `json:"isVerified" gorm:"not null"`
-	IsFrozen     bool        `json:"isFreezed" gorm:"not null"`
+	IsFrozen     bool        `json:"isFrozen" gorm:"not null"`
 	LastLogin    time.Time   `json:"lastLogin" gorm:"not null"`
 	Role         Role        `json:"role" gorm:"foreignKey:RoleID;references:ID"`
 	UserProfile  UserProfile `json:"userProfile" gorm:"foreignKey:UserID;references:ID;constraints:OnUpdate:CASCADE,OnDelete:CASCADE"`

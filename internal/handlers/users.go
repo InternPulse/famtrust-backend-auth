@@ -232,18 +232,18 @@ func (uh *UserHandlers) Validate(c *gin.Context) {
 		Id:          user.Role.ID,
 		Permissions: permissions,
 	}
-	userPayload := loginUserData{
+	userPayload := cleanUserData{
 		Id:           user.ID,
 		Email:        user.Email,
 		Has2FA:       user.Has2FA,
 		DefaultGroup: user.DefaultGroup,
 		IsVerified:   user.IsVerified,
-		IsFreezed:    user.IsFrozen,
+		IsFrozen:     user.IsFrozen,
 		LastLogin:    user.LastLogin,
 		Role:         role,
 	}
 
-	payload := verifyResponse{
+	payload := validateResponse{
 		StatusCode: http.StatusOK,
 		Status:     "success",
 		Message:    "User session is valid",
@@ -565,11 +565,33 @@ func (uh *UserHandlers) GetUsersByDefaultGroup(c *gin.Context) {
 		return
 	}
 
+	var cleanUsers []cleanUserData
+	for _, user := range *users {
+
+		userPerms := uh.GetPermissions(user.Role.Permissions)
+		userRole := role{
+			Id:          user.Role.ID,
+			Permissions: userPerms,
+		}
+		cleanUser := cleanUserData{
+			Id:           user.ID,
+			Email:        user.Email,
+			Has2FA:       user.Has2FA,
+			DefaultGroup: user.DefaultGroup,
+			IsVerified:   user.IsVerified,
+			IsFrozen:     user.IsFrozen,
+			LastLogin:    user.LastLogin,
+			Role:         userRole,
+		}
+
+		cleanUsers = append(cleanUsers, cleanUser)
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"statusCode": http.StatusOK,
 		"status":     "success",
 		"message":    "Users retrieved successfully",
-		"users":      users,
+		"users":      cleanUsers,
 	})
 }
 
@@ -609,7 +631,7 @@ func (uh *UserHandlers) GetUserByDefaultGroup(c *gin.Context) {
 		return
 	}
 
-	// validate the user against the database
+	// Retrieve the Calling user from the database
 	user, err := uh.models.Users().GetUserByID(UserID.(uuid.UUID))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, loginResponse{
@@ -620,7 +642,7 @@ func (uh *UserHandlers) GetUserByDefaultGroup(c *gin.Context) {
 		return
 	}
 
-	// Confirm User 'canListUsers'
+	// Confirm user 'canListUsers'
 	permissions := uh.GetPermissions(user.Role.Permissions)
 	if !slices.Contains(permissions, "canListUsers") {
 		c.JSON(http.StatusUnauthorized, loginResponse{
@@ -631,7 +653,7 @@ func (uh *UserHandlers) GetUserByDefaultGroup(c *gin.Context) {
 		return
 	}
 
-	// get the users from the database
+	// get the user from the database
 	userToGet, err := uh.models.Users().GetUserByDefaultGroup(userToGetID, user.DefaultGroup)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, loginResponse{
@@ -642,11 +664,27 @@ func (uh *UserHandlers) GetUserByDefaultGroup(c *gin.Context) {
 		return
 	}
 
+	userToGetPerms := uh.GetPermissions(userToGet.Role.Permissions)
+	userToGetRole := role{
+		Id:          userToGet.Role.ID,
+		Permissions: userToGetPerms,
+	}
+	userToGetPayload := cleanUserData{
+		Id:           userToGet.ID,
+		Email:        userToGet.Email,
+		Has2FA:       userToGet.Has2FA,
+		DefaultGroup: userToGet.DefaultGroup,
+		IsVerified:   userToGet.IsVerified,
+		IsFrozen:     userToGet.IsFrozen,
+		LastLogin:    userToGet.LastLogin,
+		Role:         userToGetRole,
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"statusCode": http.StatusOK,
 		"status":     "success",
 		"message":    "User retrieved successfully",
-		"user":       userToGet,
+		"user":       userToGetPayload,
 	})
 }
 

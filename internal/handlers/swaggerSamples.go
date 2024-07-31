@@ -63,7 +63,7 @@ type validateSampleResponse200User struct {
 	Email      string `example:"user@example.com"`
 	Has2FA     bool   `example:"true"`
 	ID         string `example:"d38f91b2-dc3b-4f9d-aeb4-7b95c91e9d08"`
-	IsFreezed  bool   `example:"true"`
+	IsFrozen   bool   `example:"true"`
 	IsVerified bool   `example:"true"`
 	LastLogin  string `example:"2024-07-22T14:30:00Z"`
 	Role       validateSampleResponseRole

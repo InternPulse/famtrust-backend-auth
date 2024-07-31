@@ -11,12 +11,12 @@ type loginRequest struct {
 	Password string `json:"password" binding:"required"`
 }
 
-type verifyResponse struct {
+type validateResponse struct {
 	StatusCode uint          `json:"statusCode"`
 	Status     string        `json:"status"`
 	Message    string        `json:"message"`
 	Token      string        `json:"token,omitempty"`
-	User       loginUserData `json:"user,omitempty"`
+	User       cleanUserData `json:"user,omitempty"`
 }
 
 type loginResponse struct {
@@ -26,14 +26,14 @@ type loginResponse struct {
 	Token      string `json:"token,omitempty"`
 }
 
-type loginUserData struct {
+type cleanUserData struct {
 	Id           uuid.UUID `json:"id"`
 	Email        string    `json:"email"`
 	Role         role      `json:"role"`
 	DefaultGroup uuid.UUID `json:"defaultGroup"`
 	Has2FA       bool      `json:"has2FA"`
 	IsVerified   bool      `json:"isVerified"`
-	IsFreezed    bool      `json:"isFreezed"`
+	IsFrozen     bool      `json:"isFrozen"`
 	LastLogin    time.Time `json:"lastLogin"`
 }
 
