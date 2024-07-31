@@ -876,7 +876,7 @@ const docTemplate = `{
                     "type": "string",
                     "example": "d38f91b2-dc3b-4f9d-aeb4-7b95c91e9d08"
                 },
-                "isFreezed": {
+                "isFrozen": {
                     "type": "boolean",
                     "example": true
                 },
