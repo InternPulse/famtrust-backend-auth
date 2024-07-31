@@ -8,7 +8,7 @@
 - name: Run docker compose
   become: true
   community.docker.docker_compose_v2:
-    project_src: ~/auth-app
+    project_src: /home/ansible/auth-app
     pull: missing
     state: present
     build: always
