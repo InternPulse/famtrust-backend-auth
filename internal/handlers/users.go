@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -395,6 +397,16 @@ func (uh *UserHandlers) CreateUser(c *gin.Context) {
 		return
 	}
 
+	token, exists := c.Get("token")
+	if !exists {
+		c.JSON(http.StatusInternalServerError, loginResponse{
+			StatusCode: http.StatusInternalServerError,
+			Status:     "error",
+			Message:    "An error occured, failed to retrieve token",
+		})
+		return
+	}
+
 	// validate the user against the database
 	userWhoCreates, err := uh.models.Users().GetUserByID(userWhoCreatesID.(uuid.UUID))
 	if err != nil {
@@ -502,11 +514,64 @@ func (uh *UserHandlers) CreateUser(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{
-		"statusCode": http.StatusCreated,
-		"status":     "success",
-		"message":    "User created successfully. User can sign in now",
-	})
+	// Call the family memberships endpoint, add user to default group
+	url := "https://core.famtrust.biz/api/v1/family-memberships"
+
+	familyMembership := gin.H{
+		"family_group_id": user.DefaultGroup.String(),
+		"user_id":         user.ID.String(),
+	}
+
+	familyMembershipJSON, err := json.Marshal(familyMembership)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, loginResponse{
+			StatusCode: http.StatusInternalServerError,
+			Status:     "error",
+			Message:    "Failed to parse family membership info into JSON",
+		})
+		return
+	}
+
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(familyMembershipJSON))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, loginResponse{
+			StatusCode: http.StatusInternalServerError,
+			Status:     "error",
+			Message:    "Failed to add user to new default family group, will not proceed without",
+		})
+		return
+	}
+
+	// Add headers
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token.(string)))
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, loginResponse{
+			StatusCode: http.StatusInternalServerError,
+			Status:     "error",
+			Message:    "Failed to add user to new default family group, will not proceed without",
+		})
+		return
+	}
+
+	if resp.StatusCode == 201 {
+		c.JSON(http.StatusCreated, gin.H{
+			"statusCode": http.StatusCreated,
+			"status":     "success",
+			"message":    "User created successfully. User can sign in now",
+		})
+	} else {
+		c.JSON(http.StatusInternalServerError, loginResponse{
+			StatusCode: http.StatusInternalServerError,
+			Status:     "error",
+			Message:    "User was created but couldn't be added to family group",
+		})
+		return
+	}
+
 }
 
 // @Summary		Get All Users in Group

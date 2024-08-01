@@ -142,7 +142,7 @@ func (uh *UserHandlers) CreateUserProfile(c *gin.Context) {
 			return
 
 		} else if user.Role.ID == "admin" && (familyGroupName != "" || familyGroupDescription != "") {
-			// Call the family groups endpoint, create a new default group
+			// 1. Call the family groups endpoint, create a new default group
 			url := "https://core.famtrust.biz/api/v1/family-groups"
 			familyGroup := gin.H{
 				"name":        familyGroupName,
@@ -184,6 +184,7 @@ func (uh *UserHandlers) CreateUserProfile(c *gin.Context) {
 				})
 				return
 			}
+
 			defer resp.Body.Close()
 
 			var familyGroupResp struct {
@@ -223,13 +224,64 @@ func (uh *UserHandlers) CreateUserProfile(c *gin.Context) {
 					return
 				}
 
-				user.DefaultGroup = groupID
-				err = uh.models.Users().UpdateUser(user)
+				// 2. Call the family memberships endpoint, add user to new default group
+				url = "https://core.famtrust.biz/api/v1/family-memberships"
+
+				familyMembership := gin.H{
+					"family_group_id": groupID.String(),
+					"user_id":         user.ID.String(),
+				}
+
+				familyMembershipJSON, err := json.Marshal(familyMembership)
 				if err != nil {
 					c.JSON(http.StatusInternalServerError, loginResponse{
 						StatusCode: http.StatusInternalServerError,
 						Status:     "error",
-						Message:    "Failed to update user with new family group ID, aborting without",
+						Message:    "Failed to parse family membership info into JSON",
+					})
+					return
+				}
+
+				req2, err := http.NewRequest("POST", url, bytes.NewBuffer(familyMembershipJSON))
+				if err != nil {
+					c.JSON(http.StatusInternalServerError, loginResponse{
+						StatusCode: http.StatusInternalServerError,
+						Status:     "error",
+						Message:    "Failed to add user to new default family group, will not proceed without",
+					})
+					return
+				}
+
+				// Add headers
+				req2.Header.Add("Content-Type", "application/json")
+				req2.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token.(string)))
+
+				resp2, err := client.Do(req)
+				if err != nil {
+					c.JSON(http.StatusInternalServerError, loginResponse{
+						StatusCode: http.StatusInternalServerError,
+						Status:     "error",
+						Message:    "Failed to add user to new default family group, will not proceed without",
+					})
+					return
+				}
+
+				if resp2.StatusCode == 201 {
+					user.DefaultGroup = groupID
+					err = uh.models.Users().UpdateUser(user)
+					if err != nil {
+						c.JSON(http.StatusInternalServerError, loginResponse{
+							StatusCode: http.StatusInternalServerError,
+							Status:     "error",
+							Message:    "Failed to update user information with default group id",
+						})
+						return
+					}
+				} else {
+					c.JSON(http.StatusInternalServerError, loginResponse{
+						StatusCode: http.StatusInternalServerError,
+						Status:     "error",
+						Message:    "Failed to add user to new default family group, will not proceed without",
 					})
 					return
 				}
