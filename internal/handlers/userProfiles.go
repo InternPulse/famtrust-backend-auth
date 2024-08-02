@@ -133,6 +133,77 @@ func (uh *UserHandlers) CreateUserProfile(c *gin.Context) {
 		familyGroupName := c.PostForm("familyGroupName")
 		familyGroupDescription := c.PostForm("familyGroupDescription")
 
+		if firstName == "" || lastName == "" || bio == "" {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"statusCode": http.StatusBadRequest,
+				"status":     "error",
+				"message":    "Incomplete required signup Info",
+			})
+			return
+		}
+
+		// Parse NIN
+		if ninStr != "" {
+			nin, err := strconv.ParseUint(ninStr, 10, 64)
+			if err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{
+					"status":  "error",
+					"message": "Invalid value for NIN",
+				})
+				return
+			}
+			profile.NIN = uint(nin)
+		}
+
+		// Parse BVN
+		if bvnStr != "" {
+			bvn, err := strconv.ParseUint(bvnStr, 10, 64)
+			if err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{
+					"status":  "error",
+					"message": "Invalid value for BVN",
+				})
+				return
+			}
+			profile.BVN = uint(bvn)
+		}
+
+		// Get profile picture
+		profilePicture, err := c.FormFile("profilePicture")
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"statusCode": http.StatusBadRequest,
+				"status":     "error",
+				"message":    "Error parsing profile picture. Check your upload",
+			})
+			return
+		}
+
+		const maxUploadSize = 16 << 20
+		if profilePicture.Size > maxUploadSize {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"statusCode": http.StatusBadRequest,
+				"status":     "error",
+				"message":    "Picture file is too large",
+			})
+			return
+		}
+
+		// Generate a unique filename
+		filename := filepath.Base(profilePicture.Filename)
+		dst := filepath.Join("images", "profilePics", filename)
+		dstURL := filepath.Join("images", "profile-pic", filename)
+
+		// Save the file
+		if err := c.SaveUploadedFile(profilePicture, dst); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"statusCode": http.StatusInternalServerError,
+				"status":     "error",
+				"message":    "Failed to save profile picture",
+			})
+			return
+		}
+
 		if user.Role.ID == "admin" && (familyGroupName == "" || familyGroupDescription == "") {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"statusCode": http.StatusBadRequest,
@@ -247,7 +318,7 @@ func (uh *UserHandlers) CreateUserProfile(c *gin.Context) {
 					c.JSON(http.StatusInternalServerError, loginResponse{
 						StatusCode: http.StatusInternalServerError,
 						Status:     "error",
-						Message:    "Failed to add user to new default family group, will not proceed without",
+						Message:    "Could not create request to family memberships endpoint",
 					})
 					return
 				}
@@ -256,12 +327,12 @@ func (uh *UserHandlers) CreateUserProfile(c *gin.Context) {
 				req2.Header.Add("Content-Type", "application/json")
 				req2.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token.(string)))
 
-				resp2, err := client.Do(req)
+				resp2, err := client.Do(req2)
 				if err != nil {
 					c.JSON(http.StatusInternalServerError, loginResponse{
 						StatusCode: http.StatusInternalServerError,
 						Status:     "error",
-						Message:    "Failed to add user to new default family group, will not proceed without",
+						Message:    "Could not make request to family memberships endpoint",
 					})
 					return
 				}
@@ -281,7 +352,7 @@ func (uh *UserHandlers) CreateUserProfile(c *gin.Context) {
 					c.JSON(http.StatusInternalServerError, loginResponse{
 						StatusCode: http.StatusInternalServerError,
 						Status:     "error",
-						Message:    "Failed to add user to new default family group, will not proceed without",
+						Message:    "Error response from family memberships endpoint",
 					})
 					return
 				}
@@ -293,73 +364,6 @@ func (uh *UserHandlers) CreateUserProfile(c *gin.Context) {
 				})
 				return
 			}
-		}
-
-		if firstName == "" || lastName == "" || bio == "" {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"statusCode": http.StatusBadRequest,
-				"status":     "error",
-				"message":    "Incomplete required signup Info",
-			})
-			return
-		}
-
-		// Parse NIN
-		if ninStr != "" {
-			nin, err := strconv.ParseUint(ninStr, 10, 64)
-			if err != nil {
-				c.JSON(http.StatusBadRequest, gin.H{
-					"status":  "error",
-					"message": "Invalid value for NIN",
-				})
-				return
-			}
-			profile.NIN = uint(nin)
-		}
-
-		// Parse BVN
-		if bvnStr != "" {
-			bvn, err := strconv.ParseUint(bvnStr, 10, 64)
-			if err != nil {
-				c.JSON(http.StatusBadRequest, gin.H{
-					"status":  "error",
-					"message": "Invalid value for BVN",
-				})
-				return
-			}
-			profile.BVN = uint(bvn)
-		}
-
-		// Get profile picture
-		profilePicture, err := c.FormFile("profilePicture")
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"statusCode": http.StatusBadRequest,
-				"status":     "error",
-				"message":    "Error parsing profile picture. Check your upload",
-			})
-			return
-		}
-
-		const maxUploadSize = 16 << 20
-		if profilePicture.Size > maxUploadSize {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"statusCode": http.StatusBadRequest,
-				"status":     "error",
-				"message":    "Picture file is too large",
-			})
-			return
-		}
-
-		// Generate a unique filename
-		filename := filepath.Base(profilePicture.Filename)
-		dst := filepath.Join("images", "profilePics", filename)
-		dstURL := filepath.Join("images", "profile-pic", filename)
-
-		// Save the file
-		if err := c.SaveUploadedFile(profilePicture, dst); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
 		}
 
 		// User values
